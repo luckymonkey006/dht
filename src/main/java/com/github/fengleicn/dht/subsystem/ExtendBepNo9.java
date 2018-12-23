@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class ExtendBepNo9 {
@@ -37,7 +38,7 @@ public class ExtendBepNo9 {
         String extHandShakePayload = "d1:md11:ut_metadatai1eee";
         int len = extHandShakePayload.length();
         int extHandShakeLen = 2 + len + 4;
-        byte[] extHandShake = ByteBuffer.allocate(extHandShakeLen).putInt(2 + len).put((byte) 20).put((byte) 0).put(extHandShakePayload.getBytes("ASCII")).array();
+        byte[] extHandShake = ByteBuffer.allocate(extHandShakeLen).putInt(2 + len).put((byte) 20).put((byte) 0).put(extHandShakePayload.getBytes(StandardCharsets.US_ASCII)).array();
 
         outputStream.write(extHandShake);
         outputStream.flush();

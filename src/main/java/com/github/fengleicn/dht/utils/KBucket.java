@@ -11,7 +11,6 @@ public class KBucket {
     final static int K = 20;
 
 
-
     @SuppressWarnings("unchecked")
     public KBucket(KBucketNode localKBucketNode) {
         buket = new List[160];
