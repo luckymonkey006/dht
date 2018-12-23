@@ -54,7 +54,7 @@ public class KBucket {
     public synchronized void add(KBucketNode KBucketNode) {
         BigInteger bigInteger = xor(KBucketNode, localKBucketNode);
         for (int i = 1; i <= 160; i++) {
-            if (bigInteger.compareTo(BigInteger.TWO.pow(i)) < 0) {
+            if (bigInteger.compareTo(BigInteger.valueOf(2).pow(i)) < 0) {
                 if(Arrays.equals(KBucketNode.ip, localKBucketNode.ip)){
                     return;
                 }
@@ -77,7 +77,7 @@ public class KBucket {
     public List<KBucketNode> get(KBucketNode KBucketNode){
         BigInteger bigInteger = xor(KBucketNode, localKBucketNode);
         for (int i = 1; i <= 160; i++) {
-            if (bigInteger.compareTo(BigInteger.TWO.pow(i)) < 0) {
+            if (bigInteger.compareTo(BigInteger.valueOf(2).pow(i)) < 0) {
                 return buket[i - 1];
             }
         }
