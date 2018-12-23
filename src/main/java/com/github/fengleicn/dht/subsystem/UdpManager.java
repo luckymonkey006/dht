@@ -1,9 +1,9 @@
 package com.github.fengleicn.dht.subsystem;
 
 import com.github.fengleicn.dht.bencode.Bcd;
-import com.github.fengleicn.dht.node.Node;
+import com.github.fengleicn.dht.node.KBucketNode;
 import com.github.fengleicn.dht.packet.UdpPacket;
-import com.github.fengleicn.dht.utils.KademliaBucket;
+import com.github.fengleicn.dht.utils.KBucket;
 import com.github.fengleicn.dht.utils.DhtUtil;
 
 import java.net.InetSocketAddress;
@@ -15,10 +15,10 @@ public class UdpManager {
     public static Map<String, Integer> get = new ConcurrentHashMap<>();
     public static Map<String, Integer> announce = new ConcurrentHashMap<>();
 
-    public KademliaBucket kademliaBucket;
+    public KBucket kBucket;
 
-    public UdpManager(KademliaBucket kademliaBucket) {
-        this.kademliaBucket = kademliaBucket;
+    public UdpManager(KBucket kBucket) {
+        this.kBucket = kBucket;
     }
 
     public UdpPacket manage(UdpPacket p, byte[] localNodeId) {
@@ -34,8 +34,8 @@ public class UdpManager {
                     case "find_node":
                         transId = b.get("t").cast();
                         byte[] target = b.get("a").get("target").cast();
-                        List<Node> nodes = kademliaBucket.get(new Node(target, null, null));
-                        return DhtUtil.rspFindNode(transId, localNodeId, nodes, remoteSocketAddress);
+                        List<KBucketNode> KBucketNodes = kBucket.get(new KBucketNode(target, null, null));
+                        return DhtUtil.rspFindNode(transId, localNodeId, KBucketNodes, remoteSocketAddress);
                     case "get_peers":
                         byte[] bytes = b.get("a").get("info_hash").cast();
                         StringBuilder sb = new StringBuilder();
@@ -54,9 +54,9 @@ public class UdpManager {
                     //ping
                 } else if (DhtUtil.byteArraysEqual(b.get("t").castB(), new byte[]{'f', 'n'})) {
                     //find node
-                    List<Node> nodes = DhtUtil.decodeNodes(b.get("r").get("nodes").castB());
-                    for (Node node : nodes)
-                        kademliaBucket.add(node);
+                    List<KBucketNode> KBucketNodes = DhtUtil.decodeNodes(b.get("r").get("KBucketNodes").castB());
+                    for (KBucketNode KBucketNode : KBucketNodes)
+                        kBucket.add(KBucketNode);
                 } else if (DhtUtil.byteArraysEqual(b.get("t").castB(), new byte[]{'g', 'p'})) {
                     //get peer
                 } else if (DhtUtil.byteArraysEqual(b.get("t").castB(), new byte[]{'a', 'p'})) {

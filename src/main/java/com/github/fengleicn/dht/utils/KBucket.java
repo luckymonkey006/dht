@@ -1,38 +1,39 @@
 package com.github.fengleicn.dht.utils;
 
-import com.github.fengleicn.dht.node.Node;
+import com.github.fengleicn.dht.node.KBucketNode;
 
 import java.math.BigInteger;
 import java.util.*;
 
-public class KademliaBucket {
-    List<Node>[] buket;
-    Node localNode;
+public class KBucket {
+    List<KBucketNode>[] buket;
+    KBucketNode localKBucketNode;
     final static int K = 20;
 
 
+
     @SuppressWarnings("unchecked")
-    public KademliaBucket(Node localNode) {
+    public KBucket(KBucketNode localKBucketNode) {
         buket = new List[160];
         for (int i = 0; i < 160; i++) {
             buket[i] = new Vector<>();
         }
-        this.localNode = localNode;
+        this.localKBucketNode = localKBucketNode;
     }
 
-    void remove(List<Node> list) {
+    void remove(List<KBucketNode> list) {
         list.remove(0);
     }
 
-    public BigInteger xor(Node node1, Node node2) {
+    public BigInteger xor(KBucketNode KBucketNode1, KBucketNode KBucketNode2) {
         byte[] buf = new byte[21];
         for (int i = 1; i < 21; i++) {
-            buf[i] = (byte) (node1.nodeId[i - 1] ^ node2.nodeId[i - 1]);
+            buf[i] = (byte) (KBucketNode1.nodeId[i - 1] ^ KBucketNode2.nodeId[i - 1]);
         }
         return new BigInteger(buf);
     }
 
-    public Node getRandom() throws Exception {
+    public KBucketNode getRandomNode() throws Exception {
         Random r  = new Random();
         List<Integer> notEmptyList = new ArrayList<>();
         for (int i = 0; i < 160; i++){
@@ -44,37 +45,37 @@ public class KademliaBucket {
             throw new Exception("notEmptyList is empty");
         int i = notEmptyList.get(r.nextInt(notEmptyList.size()));
         int size = buket[i].size();
-        if(Arrays.equals(buket[i].get(r.nextInt(size)).ip, localNode.ip)){
+        if(Arrays.equals(buket[i].get(r.nextInt(size)).ip, localKBucketNode.ip)){
             throw new Exception("a loop udp");
         }
         return buket[i].get(r.nextInt(size));
     }
 
-    public synchronized void add(Node node) {
-        BigInteger bigInteger = xor(node, localNode);
+    public synchronized void add(KBucketNode KBucketNode) {
+        BigInteger bigInteger = xor(KBucketNode, localKBucketNode);
         for (int i = 1; i <= 160; i++) {
             if (bigInteger.compareTo(BigInteger.TWO.pow(i)) < 0) {
-                if(Arrays.equals(node.ip, localNode.ip)){
+                if(Arrays.equals(KBucketNode.ip, localKBucketNode.ip)){
                     return;
                 }
                 if (buket[i - 1].size() >= K) {
                     remove(buket[i - 1]);
                 }
-                for(Node bucketNode : buket[i - 1]){
-                    if(Arrays.equals(bucketNode.nodeId, node.nodeId)){
-                        bucketNode.ip = node.ip;
-                        bucketNode.port = node.port;
+                for(KBucketNode bucketKBucketNode : buket[i - 1]){
+                    if(Arrays.equals(bucketKBucketNode.nodeId, KBucketNode.nodeId)){
+                        bucketKBucketNode.ip = KBucketNode.ip;
+                        bucketKBucketNode.port = KBucketNode.port;
                         return;
                     }
                 }
-                buket[i - 1].add(node);
+                buket[i - 1].add(KBucketNode);
                 return;
             }
         }
     }
 
-    public List<Node> get(Node node){
-        BigInteger bigInteger = xor(node, localNode);
+    public List<KBucketNode> get(KBucketNode KBucketNode){
+        BigInteger bigInteger = xor(KBucketNode, localKBucketNode);
         for (int i = 1; i <= 160; i++) {
             if (bigInteger.compareTo(BigInteger.TWO.pow(i)) < 0) {
                 return buket[i - 1];
@@ -83,12 +84,11 @@ public class KademliaBucket {
         return null;
     }
 
-    public int showNodeSize(){
+    public int nodeSize(){
         int sum = 0;
-        for (List<Node> list : buket){
+        for (List<KBucketNode> list : buket){
             sum += list.size();
         }
         return sum;
     }
-
 }

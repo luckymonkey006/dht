@@ -1,8 +1,8 @@
 package com.github.fengleicn.dht.subsystem;
 
-import com.github.fengleicn.dht.node.Node;
+import com.github.fengleicn.dht.node.KBucketNode;
 import com.github.fengleicn.dht.packet.UdpPacket;
-import com.github.fengleicn.dht.utils.KademliaBucket;
+import com.github.fengleicn.dht.utils.KBucket;
 import com.github.fengleicn.dht.utils.DhtUtil;
 
 import java.net.InetSocketAddress;
@@ -10,18 +10,18 @@ import java.net.InetSocketAddress;
 
 public class NodeInfo {
 
-    static KademliaBucket kademliaBucket;
+    static KBucket kBucket;
 
-    public NodeInfo(KademliaBucket kademliaBucket) {
-        this.kademliaBucket = kademliaBucket;
+    public NodeInfo(KBucket kBucket) {
+        this.kBucket = kBucket;
     }
 
-    public static Node getRandomNode() throws Exception {
-        return kademliaBucket.getRandom();
+    public static KBucketNode getRandomNode() throws Exception {
+        return kBucket.getRandomNode();
     }
 
-    public UdpPacket getRandomFindNodePacket(byte[] transId, Node localNode, byte[] targetId) throws Exception {
-        Node node = kademliaBucket.getRandom();
-        return DhtUtil.findNode(transId, localNode.nodeId, targetId, new InetSocketAddress(node.getIp(), node.getPort()));
+    public UdpPacket getRandomFindNodePacket(byte[] transId, KBucketNode localKBucketNode, byte[] targetId) throws Exception {
+        KBucketNode KBucketNode = kBucket.getRandomNode();
+        return DhtUtil.findNode(transId, localKBucketNode.nodeId, targetId, new InetSocketAddress(KBucketNode.getIp(), KBucketNode.getPort()));
     }
 }

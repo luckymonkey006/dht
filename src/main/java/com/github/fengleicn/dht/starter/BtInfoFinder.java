@@ -1,18 +1,18 @@
 package com.github.fengleicn.dht.starter;
 
-import com.github.fengleicn.dht.node.Node;
+import com.github.fengleicn.dht.node.KBucketNode;
 import com.github.fengleicn.dht.packet.UdpPacket;
 import com.github.fengleicn.dht.subsystem.NodeInfo;
 import com.github.fengleicn.dht.subsystem.UdpManager;
 import com.github.fengleicn.dht.subsystem.UdpNetworkContoller;
-import com.github.fengleicn.dht.utils.KademliaBucket;
+import com.github.fengleicn.dht.utils.KBucket;
 import com.github.fengleicn.dht.utils.DhtUtil;
 
 import java.net.*;
 import java.util.Arrays;
 
 public class BtInfoFinder {
-    public static Node localNode;
+    public static KBucketNode localKBucketNode;
     UdpNetworkContoller networkController;
     UdpManager udpManager;
     NodeInfo nodeInfo;
@@ -26,12 +26,12 @@ public class BtInfoFinder {
 
     public BtInfoFinder(String ip, int port) throws SocketException, UnknownHostException {
         this.localPort = port;
-        localNode = new Node(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(ip), DhtUtil.portToByte(port));
-        System.out.println("DEBUG ip: " + Arrays.toString(localNode.ip));
+        localKBucketNode = new KBucketNode(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(ip), DhtUtil.portToByte(port));
+        System.out.println("DEBUG ip: " + Arrays.toString(localKBucketNode.ip));
         networkController = new UdpNetworkContoller(new DatagramSocket(port));
-        KademliaBucket kademliaBucket = new KademliaBucket(localNode);
-        udpManager = new UdpManager(kademliaBucket);
-        nodeInfo = new NodeInfo(kademliaBucket);
+        KBucket kBucket = new KBucket(localKBucketNode);
+        udpManager = new UdpManager(kBucket);
+        nodeInfo = new NodeInfo(kBucket);
     }
 
     private void init() throws UnknownHostException {
@@ -41,12 +41,12 @@ public class BtInfoFinder {
         String urlD = "112.10.240.235";
         String urlE = "72.178.134.65";
         String urlF = "121.239.242.138";
-        udpManager.kademliaBucket.add(new Node(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(urlA), DhtUtil.portToByte(6881)));
-        udpManager.kademliaBucket.add(new Node(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(urlB), DhtUtil.portToByte(6881)));
-        udpManager.kademliaBucket.add(new Node(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(urlC), DhtUtil.portToByte(6881)));
-        udpManager.kademliaBucket.add(new Node(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(urlD), DhtUtil.portToByte(26529)));
-        udpManager.kademliaBucket.add(new Node(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(urlE), DhtUtil.portToByte(51978)));
-        udpManager.kademliaBucket.add(new Node(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(urlF), DhtUtil.portToByte(6339)));
+        udpManager.kBucket.add(new KBucketNode(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(urlA), DhtUtil.portToByte(6881)));
+        udpManager.kBucket.add(new KBucketNode(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(urlB), DhtUtil.portToByte(6881)));
+        udpManager.kBucket.add(new KBucketNode(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(urlC), DhtUtil.portToByte(6881)));
+        udpManager.kBucket.add(new KBucketNode(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(urlD), DhtUtil.portToByte(26529)));
+        udpManager.kBucket.add(new KBucketNode(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(urlE), DhtUtil.portToByte(51978)));
+        udpManager.kBucket.add(new KBucketNode(DhtUtil.randomByteArray(20), DhtUtil.hostToByte(urlF), DhtUtil.portToByte(6339)));
 
     }
 
@@ -56,7 +56,7 @@ public class BtInfoFinder {
             byte[] targetId = DhtUtil.randomByteArray(20);
             try {
                 Thread.sleep(FIND_NODE_MS);
-                networkController.send(nodeInfo.getRandomFindNodePacket(transId, localNode, targetId)); //send
+                networkController.send(nodeInfo.getRandomFindNodePacket(transId, localKBucketNode, targetId)); //send
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -68,9 +68,9 @@ public class BtInfoFinder {
         while (true) {
             try {
                 Thread.sleep(GET_PEER_MS);
-                Node node = NodeInfo.getRandomNode();
-                UdpPacket udpPacket = DhtUtil.getPeer(transId, localNode.nodeId,
-                        DhtUtil.hexToByteArray(GET_PEER_INFO_HASH), new InetSocketAddress(node.getIp(), node.getPort()));
+                KBucketNode KBucketNode = NodeInfo.getRandomNode();
+                UdpPacket udpPacket = DhtUtil.getPeer(transId, localKBucketNode.nodeId,
+                        DhtUtil.hexToByteArray(GET_PEER_INFO_HASH), new InetSocketAddress(KBucketNode.getIp(), KBucketNode.getPort()));
                 networkController.send(udpPacket);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -84,7 +84,7 @@ public class BtInfoFinder {
                 UdpPacket udpPacket = networkController.recv();
                 if (udpPacket != null) {
                     UdpPacket resp;
-                    resp = udpManager.manage(udpPacket, localNode.nodeId);
+                    resp = udpManager.manage(udpPacket, localKBucketNode.nodeId);
                     if (resp != null)
                         networkController.send(resp);
                 }
@@ -98,7 +98,7 @@ public class BtInfoFinder {
         while (true) {
             try {
                 Thread.sleep(CHANGE_NODE_ID_MS);
-                localNode.nodeId = DhtUtil.randomByteArray(20);
+                localKBucketNode.nodeId = DhtUtil.randomByteArray(20);
             } catch (Exception e) {
                 e.printStackTrace();
             }
