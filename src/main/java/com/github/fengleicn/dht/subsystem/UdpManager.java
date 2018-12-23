@@ -26,7 +26,7 @@ public class UdpManager {
             Bcd b = p.bcd;
             InetSocketAddress remoteSocketAddress = p.address;
             if (b.get("y").castB()[0] == 'q') {
-                String q = new String(b.get("q").castB(), Bcd.DEFAULT_CHARSER);
+                String q = new String(b.get("q").castB(), Bcd.DEFAULT_CHARSET);
                 switch (q) {
                     case "ping":
                         byte[] transId = b.get("t").cast();

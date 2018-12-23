@@ -1,7 +1,5 @@
 package com.github.fengleicn.dht.bencode;
 
-import org.junit.Test;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -59,7 +57,7 @@ public class BcdCoder {
                 if (num[0] == '-' && num[1] == '0' // -0123
                         || num[0] == '0' && num.length != '0') // 0123
                     throw new RuntimeException("error in BcdCoder.findNext(int) [num]: " + num);
-                v.set(new BigInteger(new String(num, Bcd.DEFAULT_CHARSER)));
+                v.set(new BigInteger(new String(num, Bcd.DEFAULT_CHARSET)));
                 return ++next;
             default:
                 if(header == '0'){
@@ -78,7 +76,7 @@ public class BcdCoder {
                     if (num[0] == '0')
                         throw new RuntimeException("error in BcdCoder.findNext(byte) [num]: " + num);
                     next++;
-                    int len = Integer.valueOf(new String(num, Bcd.DEFAULT_CHARSER));
+                    int len = Integer.valueOf(new String(num, Bcd.DEFAULT_CHARSET));
                     v.set(Arrays.copyOfRange(src, next, next + len));
                     return next + len;
                 } else {
@@ -108,7 +106,7 @@ public class BcdCoder {
                 treeMap.putAll(map);
                 for (Map.Entry<byte[], Bcd> entry : treeMap.entrySet()) {
                     ret = concat(ret,
-                            String.valueOf(entry.getKey().length).getBytes(Bcd.DEFAULT_CHARSER),
+                            String.valueOf(entry.getKey().length).getBytes(Bcd.DEFAULT_CHARSET),
                             new byte[]{':'},
                             entry.getKey(),
                             encode(entry.getValue()));
@@ -123,12 +121,12 @@ public class BcdCoder {
                 break;
             case Bcd.BTARR:
                 byte[] bytes = bcd.cast();
-                ret = concat(String.valueOf(bytes.length).getBytes(Bcd.DEFAULT_CHARSER),
+                ret = concat(String.valueOf(bytes.length).getBytes(Bcd.DEFAULT_CHARSET),
                         new byte[]{':'}, bytes);
                 break;
             case Bcd.BINT:
                 BigInteger i = bcd.cast();
-                ret = concat(new byte[]{'i'}, i.toString().getBytes(Bcd.DEFAULT_CHARSER));
+                ret = concat(new byte[]{'i'}, i.toString().getBytes(Bcd.DEFAULT_CHARSET));
                 break;
             case Bcd.ERR:
                 throw new RuntimeException("Bcd.Err");

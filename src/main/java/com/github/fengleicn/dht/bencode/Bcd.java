@@ -20,7 +20,7 @@ import java.util.Set;
  */
 public class Bcd {
     private Object data;
-    public final static Charset DEFAULT_CHARSER = Charset.forName("UTF8");
+    public final static Charset DEFAULT_CHARSET = Charset.forName("UTF8");
 
     public Bcd() {
     }
@@ -47,14 +47,14 @@ public class Bcd {
     }
 
     public <T> void put(String k, T o) {
-        put(k.getBytes(DEFAULT_CHARSER), o);
+        put(k.getBytes(DEFAULT_CHARSET), o);
     }
 
     public <T> Bcd set(T o) {
         if (o instanceof List || o instanceof Map || o instanceof BigInteger || o instanceof byte[]) {
             data = o;
         } else if (o instanceof String) {
-            data = ((String) o).getBytes(DEFAULT_CHARSER);
+            data = ((String) o).getBytes(DEFAULT_CHARSET);
         } else if (o instanceof Number) {
             if (o instanceof Double || o instanceof Float)
                 throw new RuntimeException("illegal arg");
@@ -82,7 +82,7 @@ public class Bcd {
     }
 
     public Bcd get(String k) {
-        byte[] key = k.getBytes(DEFAULT_CHARSER);
+        byte[] key = k.getBytes(DEFAULT_CHARSET);
         return get(key);
     }
 
@@ -109,7 +109,7 @@ public class Bcd {
 
     public String castS() {
         byte[] bytes = cast();
-        return new String(bytes, DEFAULT_CHARSER);
+        return new String(bytes, DEFAULT_CHARSET);
     }
 
     public final static String MAP = "Map";
@@ -143,7 +143,7 @@ public class Bcd {
         if (data instanceof Map) {
             sb.append("{");
             for (Map.Entry<byte[], Bcd> e : ((Map<byte[], Bcd>) data).entrySet()) {
-                sb.append(new String(e.getKey(), DEFAULT_CHARSER));
+                sb.append(new String(e.getKey(), DEFAULT_CHARSET));
                 sb.append(" : ");
                 sb.append(e.getValue().toString());
                 sb.append(" , ");
@@ -155,7 +155,7 @@ public class Bcd {
             sb.append("[");
             for (Bcd o : ((List<Bcd>) data)) {
                 if (o.data instanceof byte[]) {
-                    sb.append(new String(o.cast(), DEFAULT_CHARSER));
+                    sb.append(new String(o.cast(), DEFAULT_CHARSET));
                 } else {
                     sb.append(o.toString());
                 }
@@ -165,7 +165,7 @@ public class Bcd {
             sb.append("]");
             return sb.toString();
         }else if (data instanceof byte[]) {
-            return new String(((byte[]) data), DEFAULT_CHARSER);
+            return new String(((byte[]) data), DEFAULT_CHARSET);
         } else {
             return data.toString();
         }
