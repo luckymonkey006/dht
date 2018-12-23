@@ -4,18 +4,18 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-public class Node {
+public class KBucketNode {
     public byte[] nodeId;
     public byte[] ip;
     public byte[] port;
 
-    public Node(byte[] buf) {
+    public KBucketNode(byte[] buf) {
         nodeId = Arrays.copyOfRange(buf, 0, 20);
         ip = Arrays.copyOfRange(buf, 20, 24);
         port = Arrays.copyOfRange(buf, 24, 26);
     }
 
-    public Node(byte[] nodeId, byte[] ip, byte[] port) {
+    public KBucketNode(byte[] nodeId, byte[] ip, byte[] port) {
         this.nodeId = nodeId;
         this.ip = ip;
         this.port = port;

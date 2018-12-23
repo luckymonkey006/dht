@@ -1,10 +1,9 @@
 package com.github.fengleicn.dht.subsystem;
 
-import com.github.fengleicn.dht.node.Node;
+import com.github.fengleicn.dht.node.KBucketNode;
 import com.github.fengleicn.dht.starter.BtInfoFinder;
 import com.github.fengleicn.dht.utils.DhtUtil;
 import org.assertj.core.util.Lists;
-import org.assertj.core.util.Sets;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -48,9 +47,9 @@ public class BtTracker {
     }
 
     public static void request(String infoHash) throws InterruptedException, IOException {
-        Node localNode = BtInfoFinder.localNode;
-        if (localNode != null)
-            blackListSet.add(localNode.getIp() + ":" + localNode.getPort());
+        KBucketNode localKBucketNode = BtInfoFinder.localKBucketNode;
+        if (localKBucketNode != null)
+            blackListSet.add(localKBucketNode.getIp() + ":" + localKBucketNode.getPort());
 
         String[] addresses = {
                 "104.238.198.186:8000",

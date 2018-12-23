@@ -2,16 +2,14 @@ package com.github.fengleicn.dht.utils;
 
 import com.github.fengleicn.dht.bencode.Bcd;
 import com.github.fengleicn.dht.bencode.BcdHashMap;
-import com.github.fengleicn.dht.node.Node;
+import com.github.fengleicn.dht.node.KBucketNode;
 import com.github.fengleicn.dht.packet.UdpPacket;
-import org.junit.Test;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.*;
 
 public class DhtUtil {
@@ -62,30 +60,30 @@ public class DhtUtil {
         return b;
     }
 
-    public static List<Node> decodeNodes(byte[] buf) throws Exception {
+    public static List<KBucketNode> decodeNodes(byte[] buf) throws Exception {
         int len = buf.length;
         int ptr = 0, nodeLen = 26;
-        List<Node> list = new ArrayList<>();
+        List<KBucketNode> list = new ArrayList<>();
         if (len % nodeLen != 0) {
             throw new Exception("node length is wrong");
         }
         while (ptr < buf.length) {
-            list.add(new Node(Arrays.copyOfRange(buf, ptr, ptr + nodeLen)));
+            list.add(new KBucketNode(Arrays.copyOfRange(buf, ptr, ptr + nodeLen)));
             ptr += nodeLen;
         }
         return list;
     }
 
-    public static byte[] encodeNodes(List<Node> nodes) {
-        if (nodes == null || nodes.size() == 0)
+    public static byte[] encodeNodes(List<KBucketNode> KBucketNodes) {
+        if (KBucketNodes == null || KBucketNodes.size() == 0)
             return null;
         int ptr = 0, nodeLen = 26;
-        byte[] ret = new byte[nodes.size() * nodeLen];
-        for (Node node : nodes) {
+        byte[] ret = new byte[KBucketNodes.size() * nodeLen];
+        for (KBucketNode KBucketNode : KBucketNodes) {
             byte[] buf = new byte[nodeLen];
-            System.arraycopy(node.nodeId, 0, buf, 0, 20);
-            System.arraycopy(node.ip, 0, buf, 20, 4);
-            System.arraycopy(node.port, 0, buf, 24, 2);
+            System.arraycopy(KBucketNode.nodeId, 0, buf, 0, 20);
+            System.arraycopy(KBucketNode.ip, 0, buf, 20, 4);
+            System.arraycopy(KBucketNode.port, 0, buf, 24, 2);
             System.arraycopy(buf, 0, ret, ptr, nodeLen);
             ptr += 26;
         }
@@ -160,13 +158,13 @@ public class DhtUtil {
         return new UdpPacket(socketAddress, bcd);
     }
 
-    public static UdpPacket rspFindNode(byte[] transId, byte[] nodeId, List<Node> nodes, InetSocketAddress socketAddress) throws UnsupportedEncodingException {
+    public static UdpPacket rspFindNode(byte[] transId, byte[] nodeId, List<KBucketNode> KBucketNodes, InetSocketAddress socketAddress) throws UnsupportedEncodingException {
         Bcd bcd  = new Bcd(new BcdHashMap() {{
             put("t", new Bcd(transId));
             put("y", new Bcd("r"));
             put("r", new Bcd(new BcdHashMap() {{
                 put("id", new Bcd(nodeId));
-                put("nodes", new Bcd(encodeNodes(nodes)));
+                put("KBucketNodes", new Bcd(encodeNodes(KBucketNodes)));
             }}));
         }});
         return new UdpPacket(socketAddress, bcd);
