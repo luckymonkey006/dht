@@ -1,6 +1,6 @@
 package com.github.fengleicn.dht.utils;
 
-import com.github.fengleicn.dht.bencode.Bcd;
+import com.github.fengleicn.dht.bencode.BencodeObject;
 import com.github.fengleicn.dht.bencode.BcdHashMap;
 import com.github.fengleicn.dht.node.KBucketNode;
 import com.github.fengleicn.dht.packet.UdpPacket;
@@ -92,82 +92,82 @@ public class DhtUtil {
 
     // Request: ping, find_node, get_peer, announce_peer
     public static UdpPacket ping(byte[] transId, byte[] nodeId, InetSocketAddress socketAddress) throws UnsupportedEncodingException {
-        Bcd bcd = new Bcd(new BcdHashMap() {{
-            put("t", new Bcd(transId));
-            put("y", new Bcd("q"));
-            put("q", new Bcd("ping"));
-            put("a", new Bcd(new BcdHashMap() {{
-                put("id", new Bcd(nodeId));
+        BencodeObject bencodeObject = new BencodeObject(new BcdHashMap() {{
+            put("t", new BencodeObject(transId));
+            put("y", new BencodeObject("q"));
+            put("q", new BencodeObject("ping"));
+            put("a", new BencodeObject(new BcdHashMap() {{
+                put("id", new BencodeObject(nodeId));
             }}));
         }});
-        return new UdpPacket(socketAddress, bcd);
+        return new UdpPacket(socketAddress, bencodeObject);
     }
 
     public static UdpPacket findNode(byte[] transId, byte[] nodeId, byte[] target, InetSocketAddress socketAddress) throws UnsupportedEncodingException {
-        Bcd bcd = new Bcd(new BcdHashMap() {{
-            put("t", new Bcd(transId));
-            put("y", new Bcd("q"));
-            put("q", new Bcd("find_node"));
-            put("a", new Bcd(new BcdHashMap() {{
-                put("id", new Bcd(nodeId));
-                put("target", new Bcd(target));
+        BencodeObject bencodeObject = new BencodeObject(new BcdHashMap() {{
+            put("t", new BencodeObject(transId));
+            put("y", new BencodeObject("q"));
+            put("q", new BencodeObject("find_node"));
+            put("a", new BencodeObject(new BcdHashMap() {{
+                put("id", new BencodeObject(nodeId));
+                put("target", new BencodeObject(target));
             }}));
         }});
-        return new UdpPacket(socketAddress, bcd);
+        return new UdpPacket(socketAddress, bencodeObject);
     }
 
     public static UdpPacket getPeer(byte[] transId, byte[] nodeId, byte[] infoHash, InetSocketAddress socketAddress) throws UnsupportedEncodingException {
-        Bcd bcd = new Bcd(new BcdHashMap() {{
-            put("t", new Bcd(transId));
-            put("y", new Bcd("q"));
-            put("q", new Bcd("get_peers"));
-            put("a", new Bcd(new BcdHashMap() {{
-                put("id", new Bcd(nodeId));
-                put("info_hash", new Bcd(infoHash));
+        BencodeObject bencodeObject = new BencodeObject(new BcdHashMap() {{
+            put("t", new BencodeObject(transId));
+            put("y", new BencodeObject("q"));
+            put("q", new BencodeObject("get_peers"));
+            put("a", new BencodeObject(new BcdHashMap() {{
+                put("id", new BencodeObject(nodeId));
+                put("info_hash", new BencodeObject(infoHash));
             }}));
         }});
-        return new UdpPacket(socketAddress, bcd);
+        return new UdpPacket(socketAddress, bencodeObject);
     }
 
     public static UdpPacket announcePeer(byte[] transId, byte[] nodeId, byte[] infoHash, int port, byte[] token, InetSocketAddress socketAddress) throws UnsupportedEncodingException {
-        Bcd bcd = new Bcd(new BcdHashMap() {{
-            put("t", new Bcd(transId));
-            put("y", new Bcd("q"));
-            put("q", new Bcd("announce_peer"));
-            put("a", new Bcd(new BcdHashMap() {{
-                put("id", new Bcd(nodeId));
-                put("implied_port", new Bcd(0));
-                put("info_hash", new Bcd(infoHash));
-                put("port", new Bcd(port));
-                put("token", new Bcd(token));
+        BencodeObject bencodeObject = new BencodeObject(new BcdHashMap() {{
+            put("t", new BencodeObject(transId));
+            put("y", new BencodeObject("q"));
+            put("q", new BencodeObject("announce_peer"));
+            put("a", new BencodeObject(new BcdHashMap() {{
+                put("id", new BencodeObject(nodeId));
+                put("implied_port", new BencodeObject(0));
+                put("info_hash", new BencodeObject(infoHash));
+                put("port", new BencodeObject(port));
+                put("token", new BencodeObject(token));
             }}));
         }});
-        return new UdpPacket(socketAddress, bcd);
+        return new UdpPacket(socketAddress, bencodeObject);
 
     }
 
     // Response: ping, find_node ...
     public static UdpPacket rspPing(byte[] transId, byte[] nodeId, InetSocketAddress socketAddress) {
-        Bcd bcd = new Bcd(new BcdHashMap() {{
-            put("t", new Bcd(transId));
-            put("y", new Bcd("r".getBytes()));
-            put("r", new Bcd(new BcdHashMap() {{
-                put("id", new Bcd(nodeId));
+        BencodeObject bencodeObject = new BencodeObject(new BcdHashMap() {{
+            put("t", new BencodeObject(transId));
+            put("y", new BencodeObject("r".getBytes()));
+            put("r", new BencodeObject(new BcdHashMap() {{
+                put("id", new BencodeObject(nodeId));
             }}));
         }});
-        return new UdpPacket(socketAddress, bcd);
+        return new UdpPacket(socketAddress, bencodeObject);
     }
 
     public static UdpPacket rspFindNode(byte[] transId, byte[] nodeId, List<KBucketNode> KBucketNodes, InetSocketAddress socketAddress) throws UnsupportedEncodingException {
-        Bcd bcd  = new Bcd(new BcdHashMap() {{
-            put("t", new Bcd(transId));
-            put("y", new Bcd("r"));
-            put("r", new Bcd(new BcdHashMap() {{
-                put("id", new Bcd(nodeId));
-                put("KBucketNodes", new Bcd(encodeNodes(KBucketNodes)));
+        BencodeObject bencodeObject = new BencodeObject(new BcdHashMap() {{
+            put("t", new BencodeObject(transId));
+            put("y", new BencodeObject("r"));
+            put("r", new BencodeObject(new BcdHashMap() {{
+                put("id", new BencodeObject(nodeId));
+                put("KBucketNodes", new BencodeObject(encodeNodes(KBucketNodes)));
             }}));
         }});
-        return new UdpPacket(socketAddress, bcd);
+        return new UdpPacket(socketAddress, bencodeObject);
     }
 
     public static UdpPacket rspGetPeerNotFound() throws UnsupportedEncodingException {

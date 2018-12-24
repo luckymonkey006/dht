@@ -11,27 +11,27 @@ import java.util.Set;
 
 /**
  * Usage:
- * Bcd bcd = ...;
- * bcd.get(int, byte[], String) => bcd;
- * bcd.cast() => map, list, bigInteger, byte[];
- * bcd.castI/L/S => int, long, String of bcd;
- * bcd.set(int, long, string, byte[], map<byte[], Bcd>, list<Bcd>)
- * bcd.put/add(...)
+ * BencodeObject bencodeObject = ...;
+ * bencodeObject.get(int, byte[], String) => bencodeObject;
+ * bencodeObject.cast() => map, list, bigInteger, byte[];
+ * bencodeObject.castI/L/S => int, long, String of bencodeObject;
+ * bencodeObject.set(int, long, string, byte[], map<byte[], BencodeObject>, list<BencodeObject>)
+ * bencodeObject.put/add(...)
  */
-public class Bcd {
+public class BencodeObject {
     private Object data;
     public final static Charset DEFAULT_CHARSET = Charset.forName("UTF8");
 
-    public Bcd() {
+    public BencodeObject() {
     }
 
-    public <T> Bcd(T o) {
+    public <T> BencodeObject(T o) {
         set(o);
     }
 
     public <T> void add(T o) {
         if (data instanceof List) {
-            ((List<Bcd>) data).add(new Bcd().set(o));
+            ((List<BencodeObject>) data).add(new BencodeObject().set(o));
         } else {
             throw new RuntimeException("not a list");
         }
@@ -40,7 +40,7 @@ public class Bcd {
 
     public <T> void put(byte[] k, T o) {
         if (data instanceof Map) {
-            ((Map<byte[], Bcd>) data).put(k, new Bcd(o));
+            ((Map<byte[], BencodeObject>) data).put(k, new BencodeObject(o));
         } else {
             throw new RuntimeException("not a map");
         }
@@ -50,7 +50,7 @@ public class Bcd {
         put(k.getBytes(DEFAULT_CHARSET), o);
     }
 
-    public <T> Bcd set(T o) {
+    public <T> BencodeObject set(T o) {
         if (o instanceof List || o instanceof Map || o instanceof BigInteger || o instanceof byte[]) {
             data = o;
         } else if (o instanceof String) {
@@ -59,8 +59,8 @@ public class Bcd {
             if (o instanceof Double || o instanceof Float)
                 throw new RuntimeException("illegal arg");
             data = new BigInteger(String.valueOf(((Number) o).longValue()));
-        } else if (o instanceof Bcd) {
-            data = ((Bcd) o).data;
+        } else if (o instanceof BencodeObject) {
+            data = ((BencodeObject) o).data;
         } else if(o == null) {
             throw new RuntimeException("arg is null");
         }else{
@@ -69,8 +69,8 @@ public class Bcd {
         return this;
     }
 
-    public Bcd get(byte[] k) {
-        Map<byte[], Bcd> map = ((Map<byte[], Bcd>) data);
+    public BencodeObject get(byte[] k) {
+        Map<byte[], BencodeObject> map = ((Map<byte[], BencodeObject>) data);
         Set<byte[]> keySet = map.keySet();
         for (byte[] key : keySet) {
             if (DhtUtil.byteArraysEqual(k, key)) {
@@ -81,13 +81,13 @@ public class Bcd {
         throw new RuntimeException("not find key-value");
     }
 
-    public Bcd get(String k) {
+    public BencodeObject get(String k) {
         byte[] key = k.getBytes(DEFAULT_CHARSET);
         return get(key);
     }
 
-    public Bcd get(int k) {
-        List<Bcd> list = (List<Bcd>) data;
+    public BencodeObject get(int k) {
+        List<BencodeObject> list = (List<BencodeObject>) data;
         return list.get(k);
     }
 
@@ -142,7 +142,7 @@ public class Bcd {
         StringBuilder sb = new StringBuilder();
         if (data instanceof Map) {
             sb.append("{");
-            for (Map.Entry<byte[], Bcd> e : ((Map<byte[], Bcd>) data).entrySet()) {
+            for (Map.Entry<byte[], BencodeObject> e : ((Map<byte[], BencodeObject>) data).entrySet()) {
                 sb.append(new String(e.getKey(), DEFAULT_CHARSET));
                 sb.append(" : ");
                 sb.append(e.getValue().toString());
@@ -153,7 +153,7 @@ public class Bcd {
             return sb.toString();
         } else if (data instanceof List) {
             sb.append("[");
-            for (Bcd o : ((List<Bcd>) data)) {
+            for (BencodeObject o : ((List<BencodeObject>) data)) {
                 if (o.data instanceof byte[]) {
                     sb.append(new String(o.cast(), DEFAULT_CHARSET));
                 } else {

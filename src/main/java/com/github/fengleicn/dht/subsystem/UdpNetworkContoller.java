@@ -1,17 +1,15 @@
 package com.github.fengleicn.dht.subsystem;
 
-import com.github.fengleicn.dht.bencode.Bcd;
-import com.github.fengleicn.dht.bencode.BcdCoder;
+import com.github.fengleicn.dht.bencode.BencodeObject;
+import com.github.fengleicn.dht.bencode.BencodeUtil;
 import com.github.fengleicn.dht.packet.UdpPacket;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
-import java.util.Date;
 
 public
 /**
@@ -39,8 +37,8 @@ class UdpNetworkContoller {
     }
 
     public void send(UdpPacket udpPacket) throws IOException {
-        Bcd bcd = udpPacket.bcd;
-        byte[] b = BcdCoder.encode(bcd);
+        BencodeObject bencodeObject = udpPacket.bencodeObject;
+        byte[] b = BencodeUtil.encode(bencodeObject);
         printByte(sendWriter, b, udpPacket.address.getHostString(), udpPacket.address.getPort());
         datagramSocket.send(new DatagramPacket(b, b.length, udpPacket.address));
     }
@@ -51,9 +49,9 @@ class UdpNetworkContoller {
         datagramSocket.receive(packet);
         byte[] b = Arrays.copyOf(packet.getData(), packet.getLength());
         printByte(recvWriter, b, packet.getAddress().getHostAddress(), packet.getPort());
-        Bcd bcd;
+        BencodeObject bencodeObject;
         try {
-            bcd = BcdCoder.decode(b);
+            bencodeObject = BencodeUtil.decode(b);
         }catch (Exception e){
             byte[] p = b.clone();
             for (int i = 0; i < p.length; i++) {
@@ -62,10 +60,10 @@ class UdpNetworkContoller {
             System.err.println(new String(p));
             throw e;
         }
-        return new UdpPacket((InetSocketAddress) packet.getSocketAddress(), bcd);
+        return new UdpPacket((InetSocketAddress) packet.getSocketAddress(), bencodeObject);
     }
 
-    public void printByte(FileWriter w, byte[] b, String ip, int port) throws IOException {
+    public void printByte(FileWriter w, byte[] b, String ip, int port) {
 //        byte[] p = b.clone();
 //        for (int i = 0; i < p.length; i++) {
 //            p[i] = p[i] >= ' ' && p[i] <= '~' ? p[i] : (byte) '.';

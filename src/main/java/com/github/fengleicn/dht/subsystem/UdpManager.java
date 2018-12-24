@@ -1,6 +1,6 @@
 package com.github.fengleicn.dht.subsystem;
 
-import com.github.fengleicn.dht.bencode.Bcd;
+import com.github.fengleicn.dht.bencode.BencodeObject;
 import com.github.fengleicn.dht.node.KBucketNode;
 import com.github.fengleicn.dht.packet.UdpPacket;
 import com.github.fengleicn.dht.utils.KBucket;
@@ -23,10 +23,10 @@ public class UdpManager {
 
     public UdpPacket manage(UdpPacket p, byte[] localNodeId) {
         try {
-            Bcd b = p.bcd;
+            BencodeObject b = p.bencodeObject;
             InetSocketAddress remoteSocketAddress = p.address;
             if (b.get("y").castB()[0] == 'q') {
-                String q = new String(b.get("q").castB(), Bcd.DEFAULT_CHARSET);
+                String q = new String(b.get("q").castB(), BencodeObject.DEFAULT_CHARSET);
                 switch (q) {
                     case "ping":
                         byte[] transId = b.get("t").cast();
@@ -71,7 +71,7 @@ public class UdpManager {
     }
 
 
-    public void save(Bcd recv, int type) {
+    public void save(BencodeObject recv, int type) {
         StringBuilder sb = new StringBuilder();
         byte[] bytes = recv.get("a").get("info_hash").castB();
         for (byte a : bytes) {

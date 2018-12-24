@@ -1,45 +1,47 @@
 package com.github.fengleicn.dht.bencode;
 
+import org.apache.http.client.utils.URLEncodedUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
 // for Bencode encoding / decoding
-public class BcdCoder {
-    static class BcdWrapper {
-        public Bcd bcd;
+public class BencodeUtil {
+    static class BencodeObjectWrapper {
+        public BencodeObject bencodeObject;
     }
 
-    public static Bcd decode(final byte[] src) throws IOException {
-        BcdWrapper bcdWrapper = new BcdWrapper();
-        findNext(src, 0, bcdWrapper);
-        return bcdWrapper.bcd;
+    public static BencodeObject decode(final byte[] src) throws IOException {
+        BencodeObjectWrapper bencodeObjectWrapper = new BencodeObjectWrapper();
+        findNext(src, 0, bencodeObjectWrapper);
+        return bencodeObjectWrapper.bencodeObject;
     }
 
-    public static int findNext(final byte[] src, final int ptr, final BcdWrapper bcdWrapper) throws IOException {
+    public static int findNext(final byte[] src, final int ptr, final BencodeObjectWrapper bencodeObjectWrapper) {
         byte header = src[ptr];
-        Bcd v = (bcdWrapper.bcd = new Bcd());
+        BencodeObject v = (bencodeObjectWrapper.bencodeObject = new BencodeObject());
         int next = ptr;
         switch (header) {
             case 'd':
                 next++;
-                v.set(new HashMap<byte[], Bcd>());
+                v.set(new HashMap<byte[], BencodeObject>());
                 while (src[next] != 'e') {
-                    BcdWrapper wrapper = new BcdWrapper();
+                    BencodeObjectWrapper wrapper = new BencodeObjectWrapper();
                     next = findNext(src, next, wrapper);
-                    byte[] key = wrapper.bcd.cast();
+                    byte[] key = wrapper.bencodeObject.cast();
                     next = findNext(src, next, wrapper);
-                    v.put(key, wrapper.bcd);
+                    v.put(key, wrapper.bencodeObject);
                 }
                 return ++next;
             case 'l':
                 next++;
-                v.set(new ArrayList<Bcd>());
+                v.set(new ArrayList<BencodeObject>());
                 while (src[next] != 'e') {
-                    BcdWrapper w = new BcdWrapper();
+                    BencodeObjectWrapper w = new BencodeObjectWrapper();
                     next = findNext(src, next, w);
-                    v.add(w.bcd);
+                    v.add(w.bencodeObject);
                 }
                 return ++next;
             case 'i':
@@ -48,7 +50,7 @@ public class BcdCoder {
                 byte b;
                 while ((b = src[next]) != 'e') {
                     if (b != '-' && !(b >= '0' && b <= '9')) {
-                        throw new RuntimeException("error in BcdCoder.findNext(int) token: " + b);
+                        throw new RuntimeException("error in BencodeUtil.findNext(int) token: " + b);
                     }
                     byteArrayOutputStream.write(b);
                     next++;
@@ -56,8 +58,8 @@ public class BcdCoder {
                 byte[] num = byteArrayOutputStream.toByteArray();
                 if (num[0] == '-' && num[1] == '0' // -0123
                         || num[0] == '0' && num.length != '0') // 0123
-                    throw new RuntimeException("error in BcdCoder.findNext(int) [num]: " + num);
-                v.set(new BigInteger(new String(num, Bcd.DEFAULT_CHARSET)));
+                    throw new RuntimeException("error in BencodeUtil.findNext(int) [num]: " + num);
+                v.set(new BigInteger(new String(num, BencodeObject.DEFAULT_CHARSET)));
                 return ++next;
             default:
                 if(header == '0'){
@@ -67,32 +69,32 @@ public class BcdCoder {
                     byteArrayOutputStream = new ByteArrayOutputStream();
                     while ((b = src[next]) != ':') {
                         if (!(b >= '0' && b <= '9')) {
-                            throw new RuntimeException("error in BcdCoder.findNext(int) token: " + b);
+                            throw new RuntimeException("error in BencodeUtil.findNext(int) token: " + b);
                         }
                         byteArrayOutputStream.write(b);
                         next++;
                     }
                     num = byteArrayOutputStream.toByteArray();
                     if (num[0] == '0')
-                        throw new RuntimeException("error in BcdCoder.findNext(byte) [num]: " + num);
+                        throw new RuntimeException("error in BencodeUtil.findNext(byte) [num]: " + num);
                     next++;
-                    int len = Integer.valueOf(new String(num, Bcd.DEFAULT_CHARSET));
+                    int len = Integer.valueOf(new String(num, BencodeObject.DEFAULT_CHARSET));
                     v.set(Arrays.copyOfRange(src, next, next + len));
                     return next + len;
                 } else {
-                    throw new RuntimeException("error in BcdCoder.findNext: header == " + header);
+                    throw new RuntimeException("error in BencodeUtil.findNext: header == " + header);
                 }
         }
     }
 
     // encode
-    public static byte[] encode(Bcd bcd) {
+    public static byte[] encode(BencodeObject bencodeObject) {
         byte[] ret = {};
-        switch (bcd.type()) {
-            case Bcd.MAP:
+        switch (bencodeObject.type()) {
+            case BencodeObject.MAP:
                 ret = new byte[]{'d'};
-                Map<byte[], Bcd> map = bcd.cast();
-                TreeMap<byte[], Bcd> treeMap = new TreeMap<>((o1, o2) -> {
+                Map<byte[], BencodeObject> map = bencodeObject.cast();
+                TreeMap<byte[], BencodeObject> treeMap = new TreeMap<>((o1, o2) -> {
                     int len = o1.length > o2.length ? o2.length : o1.length;
                     for (int i = 0; i < len; i++) {
                         if (o1[i] == o2[i]) {
@@ -104,34 +106,34 @@ public class BcdCoder {
                     return 0;
                 });
                 treeMap.putAll(map);
-                for (Map.Entry<byte[], Bcd> entry : treeMap.entrySet()) {
+                for (Map.Entry<byte[], BencodeObject> entry : treeMap.entrySet()) {
                     ret = concat(ret,
-                            String.valueOf(entry.getKey().length).getBytes(Bcd.DEFAULT_CHARSET),
+                            String.valueOf(entry.getKey().length).getBytes(BencodeObject.DEFAULT_CHARSET),
                             new byte[]{':'},
                             entry.getKey(),
                             encode(entry.getValue()));
                 }
                 break;
-            case Bcd.LIST:
+            case BencodeObject.LIST:
                 ret = new byte[]{'l'};
-                List<Bcd> list = bcd.cast();
-                for (Bcd b : list) {
+                List<BencodeObject> list = bencodeObject.cast();
+                for (BencodeObject b : list) {
                     ret = concat(ret, encode(b));
                 }
                 break;
-            case Bcd.BTARR:
-                byte[] bytes = bcd.cast();
-                ret = concat(String.valueOf(bytes.length).getBytes(Bcd.DEFAULT_CHARSET),
+            case BencodeObject.BTARR:
+                byte[] bytes = bencodeObject.cast();
+                ret = concat(String.valueOf(bytes.length).getBytes(BencodeObject.DEFAULT_CHARSET),
                         new byte[]{':'}, bytes);
                 break;
-            case Bcd.BINT:
-                BigInteger i = bcd.cast();
-                ret = concat(new byte[]{'i'}, i.toString().getBytes(Bcd.DEFAULT_CHARSET));
+            case BencodeObject.BINT:
+                BigInteger i = bencodeObject.cast();
+                ret = concat(new byte[]{'i'}, i.toString().getBytes(BencodeObject.DEFAULT_CHARSET));
                 break;
-            case Bcd.ERR:
-                throw new RuntimeException("Bcd.Err");
+            case BencodeObject.ERR:
+                throw new RuntimeException("BencodeObject.Err");
         }
-        if (bcd.type() != Bcd.BTARR)
+        if (bencodeObject.type() != BencodeObject.BTARR)
             ret = concat(ret, new byte[]{'e'});
         return ret;
     }
