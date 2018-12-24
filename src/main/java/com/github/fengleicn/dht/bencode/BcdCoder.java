@@ -7,37 +7,37 @@ import java.util.*;
 
 // for Bencode encoding / decoding
 public class BcdCoder {
-    static class BvCarrier {
+    static class BcdWrapper {
         public Bcd bcd;
     }
 
     public static Bcd decode(final byte[] src) throws IOException {
-        BvCarrier bvCarrier = new BvCarrier();
-        findNext(src, 0, bvCarrier);
-        return bvCarrier.bcd;
+        BcdWrapper bcdWrapper = new BcdWrapper();
+        findNext(src, 0, bcdWrapper);
+        return bcdWrapper.bcd;
     }
 
-    public static int findNext(final byte[] src, final int ptr, final BvCarrier bvCarrier) throws IOException {
+    public static int findNext(final byte[] src, final int ptr, final BcdWrapper bcdWrapper) throws IOException {
         byte header = src[ptr];
-        Bcd v = (bvCarrier.bcd = new Bcd());
+        Bcd v = (bcdWrapper.bcd = new Bcd());
         int next = ptr;
         switch (header) {
             case 'd':
                 next++;
                 v.set(new HashMap<byte[], Bcd>());
                 while (src[next] != 'e') {
-                    BvCarrier w = new BvCarrier();
-                    next = findNext(src, next, w);
-                    byte[] key = w.bcd.cast();
-                    next = findNext(src, next, w);
-                    v.put(key, w.bcd);
+                    BcdWrapper wrapper = new BcdWrapper();
+                    next = findNext(src, next, wrapper);
+                    byte[] key = wrapper.bcd.cast();
+                    next = findNext(src, next, wrapper);
+                    v.put(key, wrapper.bcd);
                 }
                 return ++next;
             case 'l':
                 next++;
                 v.set(new ArrayList<Bcd>());
                 while (src[next] != 'e') {
-                    BvCarrier w = new BvCarrier();
+                    BcdWrapper w = new BcdWrapper();
                     next = findNext(src, next, w);
                     v.add(w.bcd);
                 }
