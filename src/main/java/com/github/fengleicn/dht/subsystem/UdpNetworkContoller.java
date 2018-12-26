@@ -38,38 +38,46 @@ class UdpNetworkContoller {
 
     public void send(UdpPacket udpPacket) throws IOException {
         BencodeObject bencodeObject = udpPacket.bencodeObject;
-        byte[] b = BencodeUtil.toBencodeString(bencodeObject);
-        printByte(sendWriter, b, udpPacket.address.getHostString(), udpPacket.address.getPort());
-        datagramSocket.send(new DatagramPacket(b, b.length, udpPacket.address));
+        byte[] sendBytes = BencodeUtil.toBencodeString(bencodeObject);
+        printBytes(sendBytes);
+        datagramSocket.send(new DatagramPacket(sendBytes, sendBytes.length, udpPacket.address));
     }
 
     public UdpPacket recv() throws Exception {
         byte[] buf = new byte[65536];
         DatagramPacket packet = new DatagramPacket(buf, buf.length);
         datagramSocket.receive(packet);
-        byte[] b = Arrays.copyOf(packet.getData(), packet.getLength());
-        printByte(recvWriter, b, packet.getAddress().getHostAddress(), packet.getPort());
+        byte[] recvBytes = Arrays.copyOf(packet.getData(), packet.getLength());
+        printBytes(recvBytes);
         BencodeObject bencodeObject;
         try {
-            bencodeObject = BencodeUtil.parse(b);
+            bencodeObject = BencodeUtil.parse(recvBytes);
         }catch (Exception e){
-            byte[] p = b.clone();
-            for (int i = 0; i < p.length; i++) {
-                p[i] = p[i] >= ' ' && p[i] <= '~' ? p[i] : (byte) '.';
-            }
-            System.err.println(new String(p));
+            printBytes(recvBytes);
             throw e;
         }
         return new UdpPacket((InetSocketAddress) packet.getSocketAddress(), bencodeObject);
     }
 
-    public void printByte(FileWriter w, byte[] b, String ip, int port) {
-//        byte[] p = b.clone();
-//        for (int i = 0; i < p.length; i++) {
-//            p[i] = p[i] >= ' ' && p[i] <= '~' ? p[i] : (byte) '.';
-//        }
-//        w.append(new Date().toString()).append(" : ").append(String.format("%22s", ip + ":" + port))
-//                .append(" => ").append(new String(p)).append("\n");
-//        w.flush();
+    public void printBytes(byte[] recvBytes) {
+        byte[] copy = recvBytes.clone();
+        for (int i = 0; i < copy.length; i++) {
+            byte b = copy[i];
+            b = b >= ' ' && b <= '~' ? b : (byte) '.';
+            if(b == '\n' || b == '\t' || b == '\r' || b == '\f'){
+                b = '.';
+            }
+            copy[i] = b;
+        }
+        System.err.println("Original: " + new String(copy));
+        for (int i = 0; i < copy.length; i++) {
+            byte b = copy[i];
+            b = b >= ' ' && b <= '~' ? (byte) ' ' : (byte) '*' ;
+            if(b == '\n' || b == '\t' || b == '\r' || b == '\f'){
+                b = '*';
+            }
+            copy[i] = b;
+        }
+        System.err.println("Mask:     " + new String(copy));
     }
 }

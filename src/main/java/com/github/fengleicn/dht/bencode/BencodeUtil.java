@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
-// for Bencode encoding / decoding
 public class BencodeUtil {
     static class BencodeObjectWrapper {
         BencodeObject bencodeObject;
@@ -20,7 +19,7 @@ public class BencodeUtil {
         }
     }
 
-    public static BencodeObject parse(final byte[] src) throws IOException {
+    public static BencodeObject parse(final byte[] src) {
         BencodeObjectWrapper bencodeObjectWrapper = new BencodeObjectWrapper();
         next(src, 0, bencodeObjectWrapper);
         return bencodeObjectWrapper.bencodeObject;
@@ -54,17 +53,17 @@ public class BencodeUtil {
             case 'i':
                 pointer++;
                 ByteArrayOutputStream bytesOs = new ByteArrayOutputStream();
-                byte b;
-                while ((b = bencodeString[pointer]) != 'e') {
-                    if (b != '-' && !(b >= '0' && b <= '9')) {
-                        throw new RuntimeException("[ERROR] BencodeUtil.next(). The field token is  " + b);
+                byte byteLocalPtr;
+                while ((byteLocalPtr = bencodeString[pointer]) != 'e') {
+                    if (byteLocalPtr != '-' && !(byteLocalPtr >= '0' && byteLocalPtr <= '9')) {
+                        throw new RuntimeException("[ERROR] BencodeUtil.next(). The field token is  " + byteLocalPtr);
                     }
-                    bytesOs.write(b);
+                    bytesOs.write(byteLocalPtr);
                     pointer++;
                 }
                 byte[] number = bytesOs.toByteArray();
                 if (number[0] == '-' && number[1] == '0' || number[0] == '0' && number.length != 1) {
-                    throw new RuntimeException("[ERROR] BencodeUtil.next(). The field num is " + number);
+                    throw new RuntimeException("[ERROR] BencodeUtil.next(). The field number is " + Arrays.toString(number));
                 }
                 bencodeObj.set(new BigInteger(new String(number, BencodeObject.UNICODE_UTF8)));
                 return pointer + 1;
@@ -74,16 +73,16 @@ public class BencodeUtil {
                     return pointer + 2;
                 } else if (firstByte >= '1' && firstByte <= '9') {
                     bytesOs = new ByteArrayOutputStream();
-                    while ((b = bencodeString[pointer]) != ':') {
-                        if (!(b >= '0' && b <= '9')) {
-                            throw new RuntimeException("[ERROR] BencodeUtil.next(). The field token is " + b);
+                    while ((byteLocalPtr = bencodeString[pointer]) != ':') {
+                        if (!(byteLocalPtr >= '0' && byteLocalPtr <= '9')) {
+                            throw new RuntimeException("[ERROR] BencodeUtil.next(). The field token is " + byteLocalPtr);
                         }
-                        bytesOs.write(b);
+                        bytesOs.write(byteLocalPtr);
                         pointer++;
                     }
                     number = bytesOs.toByteArray();
                     if (number[0] == '0')
-                        throw new RuntimeException("[ERROR] BencodeUtil.next(). The field num is " + number);
+                        throw new RuntimeException("[ERROR] BencodeUtil.next(). The field number is " + Arrays.toString(number));
                     pointer++;
                     int len = Integer.valueOf(new String(number, BencodeObject.UNICODE_UTF8));
                     bencodeObj.set(Arrays.copyOfRange(bencodeString, pointer, pointer + len));
@@ -96,7 +95,7 @@ public class BencodeUtil {
 
 
     public static byte[] toBencodeString(BencodeObject bencodeObject) {
-        byte[] ret = {};
+        byte[] ret = null;
         switch (bencodeObject.type()) {
             case BencodeObject.MAP:
                 ret = new byte[]{'d'};
@@ -114,7 +113,7 @@ public class BencodeUtil {
                 for (Map.Entry<byte[], BencodeObject> entry : treeMap.entrySet()) {
                     ret = bytesConcat(ret,
                             String.valueOf(entry.getKey().length).getBytes(BencodeObject.UNICODE_UTF8),
-                            new byte[]{':'},
+                            charToByteArray(':'),
                             entry.getKey(),
                             toBencodeString(entry.getValue()));
                 }
@@ -128,15 +127,14 @@ public class BencodeUtil {
                 break;
             case BencodeObject.BYTES:
                 byte[] bytes = bencodeObject.fetch();
-                ret = bytesConcat(("" + bytes.length).getBytes(BencodeObject.UNICODE_UTF8),
-                        new byte[]{':'}, bytes);
+                ret = bytesConcat(("" + bytes.length).getBytes(BencodeObject.UNICODE_UTF8), charToByteArray(':'), bytes);
                 break;
             case BencodeObject.BIG_INTEGER:
                 BigInteger i = bencodeObject.fetch();
-                ret = bytesConcat(new byte[]{'i'}, i.toString().getBytes(BencodeObject.UNICODE_UTF8));
+                ret = bytesConcat(charToByteArray('i'), i.toString().getBytes(BencodeObject.UNICODE_UTF8));
                 break;
             case BencodeObject.ERROR:
-                throw new RuntimeException("[ERROR] BencodeObject");
+                throw new RuntimeException("[ERROR] BencodeObject has a error.");
         }
         if (!bencodeObject.type().equals(BencodeObject.BYTES))
             ret = bytesConcat(ret, new byte[]{'e'});
@@ -156,5 +154,9 @@ public class BencodeUtil {
         System.arraycopy(head, 0, result, 0, head.length);
         System.arraycopy(tail, 0, result, head.length, tail.length);
         return result;
+    }
+
+    private static byte[] charToByteArray(char character){
+        return Character.toString(character).getBytes(BencodeObject.UNICODE_UTF8);
     }
 }
