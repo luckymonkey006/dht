@@ -7,10 +7,7 @@ import org.assertj.core.util.Lists;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -180,7 +177,15 @@ public class BtTracker {
          * 16
          */
         buf = ByteBuffer.allocate(16).putLong(0x41727101980L).putInt(0).putInt(TRANS_ID).array();
-        DatagramPacket packet = new DatagramPacket(buf, buf.length, new InetSocketAddress(host, port));
+
+        SocketAddress socketAddress;
+        try{
+            socketAddress  = new InetSocketAddress(host, port);
+        }catch (Exception e){
+            System.err.println(host + "  " + port);
+            return;
+        }
+        DatagramPacket packet = new DatagramPacket(buf, buf.length, socketAddress);
         datagramSocket.send(packet);
 
         try {
