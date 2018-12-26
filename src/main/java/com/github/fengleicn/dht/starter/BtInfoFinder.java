@@ -47,7 +47,6 @@ public class BtInfoFinder {
         udpManager.kBucket.add(new KBucketNode(Utils.randomBytes(20), Utils.getBytesFromHost(urlD), Utils.getBytesFromInt(26529)));
         udpManager.kBucket.add(new KBucketNode(Utils.randomBytes(20), Utils.getBytesFromHost(urlE), Utils.getBytesFromInt(51978)));
         udpManager.kBucket.add(new KBucketNode(Utils.randomBytes(20), Utils.getBytesFromHost(urlF), Utils.getBytesFromInt(6339)));
-
     }
 
     private void findNodeTask() {
