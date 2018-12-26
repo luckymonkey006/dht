@@ -20,13 +20,11 @@ public
 
 
 class UdpNetworkContoller {
-    public static FileWriter sendWriter;
-    public static FileWriter recvWriter;
+    public static FileWriter log;
 
     static {
         try {
-            recvWriter = new FileWriter("recv.txt", true);
-            sendWriter = new FileWriter("send.txt", true);
+            log = new FileWriter("log.txt", true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -41,8 +39,8 @@ class UdpNetworkContoller {
     public void send(UdpPacket udpPacket) throws IOException {
         BencodeObject bencodeObject = udpPacket.bencodeObject;
         byte[] sendBytes = BencodeUtil.toBencodeString(bencodeObject);
-        printBytes(sendBytes);
         datagramSocket.send(new DatagramPacket(sendBytes, sendBytes.length, udpPacket.address));
+        addLog("SEND", sendBytes, udpPacket.address.getHostName(), udpPacket.address.getPort() + "");
     }
 
     public UdpPacket recv() throws Exception {
@@ -50,19 +48,28 @@ class UdpNetworkContoller {
         DatagramPacket packet = new DatagramPacket(buf, buf.length);
         datagramSocket.receive(packet);
         byte[] recvBytes = Arrays.copyOf(packet.getData(), packet.getLength());
-        printBytes(recvBytes);
+        addLog("RECV", recvBytes, packet.getAddress().getHostAddress(), packet.getPort() + "");
         BencodeObject bencodeObject;
         try {
             bencodeObject = BencodeUtil.parse(recvBytes);
-        }catch (Exception e){
+        } catch (Exception e) {
             printBytes(recvBytes);
             throw e;
         }
         return new UdpPacket((InetSocketAddress) packet.getSocketAddress(), bencodeObject);
     }
 
-    public void printBytes(byte[] recvBytes) {
-        System.err.println("Original: " + getOrignalBytesString(recvBytes));
-        System.err.println("Masked:   " + getMaskedBytesString(recvBytes));
+    public void printBytes(byte[] bytes) {
+        System.err.println("Original: " + getOrignalBytesString(bytes));
+        System.err.println("Masked:   " + getMaskedBytesString(bytes));
+    }
+
+    public void addLog(String title, byte[] bytes, String ip, String port) throws IOException {
+        log.append("[").append(title).append("]  " + System.currentTimeMillis() + "  ");
+        log.append(ip);
+        log.append(":").append(port);
+        log.append("\n");
+        log.append(getOrignalBytesString(bytes));
+        log.append("\n");
     }
 }
