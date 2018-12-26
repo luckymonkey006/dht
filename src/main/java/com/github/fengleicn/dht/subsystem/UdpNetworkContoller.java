@@ -60,24 +60,7 @@ class UdpNetworkContoller {
     }
 
     public void printBytes(byte[] recvBytes) {
-        byte[] copy = recvBytes.clone();
-        for (int i = 0; i < copy.length; i++) {
-            byte b = copy[i];
-            b = b >= ' ' && b <= '~' ? b : (byte) '.';
-            if(b == '\n' || b == '\t' || b == '\r' || b == '\f'){
-                b = '.';
-            }
-            copy[i] = b;
-        }
-        System.err.println("Original: " + new String(copy));
-        for (int i = 0; i < copy.length; i++) {
-            byte b = copy[i];
-            b = b >= ' ' && b <= '~' ? (byte) ' ' : (byte) '*' ;
-            if(b == '\n' || b == '\t' || b == '\r' || b == '\f'){
-                b = '*';
-            }
-            copy[i] = b;
-        }
-        System.err.println("Mask:     " + new String(copy));
+        System.err.println("Original: " + BencodeObject.getOrignalBytesString(recvBytes));
+        System.err.println("Masked:   " + BencodeObject.getMaskedBytesString(recvBytes));
     }
 }

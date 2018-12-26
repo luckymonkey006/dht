@@ -123,9 +123,9 @@ public class BencodeObject {
         if (data instanceof Map) {
             sb.append("{");
             for (Map.Entry<byte[], BencodeObject> e : ((Map<byte[], BencodeObject>) data).entrySet()) {
-                sb.append(new String(e.getKey(), UNICODE_UTF8));
+                sb.append(getOrignalBytesString(e.getKey()));
                 sb.append(" : ");
-                sb.append(e.getValue().toString());
+                sb.append(e.getValue());
                 sb.append(" , ");
             }
             sb.replace(sb.length() - 3, sb.length(), "");
@@ -133,11 +133,11 @@ public class BencodeObject {
             return sb.toString();
         } else if (data instanceof List) {
             sb.append("[");
-            for (BencodeObject o : ((List<BencodeObject>) data)) {
-                if (o.data instanceof byte[]) {
-                    sb.append(new String(o.fetch(), UNICODE_UTF8));
+            for (BencodeObject element : ((List<BencodeObject>) data)) {
+                if (element.data instanceof byte[]) {
+                    sb.append(new String(element.fetch(), UNICODE_UTF8));
                 } else {
-                    sb.append(o.toString());
+                    sb.append(element);
                 }
                 sb.append(" , ");
             }
@@ -149,5 +149,31 @@ public class BencodeObject {
         } else {
             return data.toString();
         }
+    }
+
+    public static String getOrignalBytesString(byte[] bytes){
+        byte[] copy = bytes.clone();
+        for (int i = 0; i < copy.length; i++) {
+            byte b = copy[i];
+            b = b >= ' ' && b <= '~' ? b : (byte) '.';
+            if(b == '\n' || b == '\t' || b == '\r' || b == '\f'){
+                b = '.';
+            }
+            copy[i] = b;
+        }
+        return new String(copy);
+    }
+
+    public static String getMaskedBytesString(byte[] bytes){
+        byte[] copy = bytes.clone();
+        for (int i = 0; i < copy.length; i++) {
+            byte b = copy[i];
+            b = b >= ' ' && b <= '~' ? (byte) ' ' : (byte) '*' ;
+            if(b == '\n' || b == '\t' || b == '\r' || b == '\f'){
+                b = '*';
+            }
+            copy[i] = b;
+        }
+        return new String(copy);
     }
 }
