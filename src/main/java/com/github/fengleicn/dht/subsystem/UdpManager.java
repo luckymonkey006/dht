@@ -25,8 +25,8 @@ public class UdpManager {
         try {
             BencodeObject b = p.bencodeObject;
             InetSocketAddress remoteSocketAddress = p.address;
-            if (b.get("y").castB()[0] == 'q') {
-                String q = new String(b.get("q").castB(), BencodeObject.UNICODE_UTF8);
+            if (b.get("y").castToBytes()[0] == 'q') {
+                String q = new String(b.get("q").castToBytes(), BencodeObject.UNICODE_UTF8);
                 switch (q) {
                     case "ping":
                         byte[] transId = b.get("t").fetch();
@@ -45,21 +45,21 @@ public class UdpManager {
                         save(b, BtLibrary.GET);
                         break;
                     case "announce_peer":
-                        transId = b.get("t").castB();
+                        transId = b.get("t").castToBytes();
                         save(b, BtLibrary.ANNOUNCE);
                         return DhtUtil.rspAnnouncePeer(transId, localNodeId, remoteSocketAddress); //TODO check token
                 }
             } else {
-                if (DhtUtil.byteArraysEqual(b.get("t").castB(), new byte[]{'p', 'g'})) {
+                if (DhtUtil.byteArraysEqual(b.get("t").castToBytes(), new byte[]{'p', 'g'})) {
                     //ping
-                } else if (DhtUtil.byteArraysEqual(b.get("t").castB(), new byte[]{'f', 'n'})) {
+                } else if (DhtUtil.byteArraysEqual(b.get("t").castToBytes(), new byte[]{'f', 'n'})) {
                     //find node
-                    List<KBucketNode> KBucketNodes = DhtUtil.decodeNodes(b.get("r").get("KBucketNodes").castB());
+                    List<KBucketNode> KBucketNodes = DhtUtil.decodeNodes(b.get("r").get("KBucketNodes").castToBytes());
                     for (KBucketNode KBucketNode : KBucketNodes)
                         kBucket.add(KBucketNode);
-                } else if (DhtUtil.byteArraysEqual(b.get("t").castB(), new byte[]{'g', 'p'})) {
+                } else if (DhtUtil.byteArraysEqual(b.get("t").castToBytes(), new byte[]{'g', 'p'})) {
                     //get peer
-                } else if (DhtUtil.byteArraysEqual(b.get("t").castB(), new byte[]{'a', 'p'})) {
+                } else if (DhtUtil.byteArraysEqual(b.get("t").castToBytes(), new byte[]{'a', 'p'})) {
                     //announce peer
                 }
             }
@@ -73,7 +73,7 @@ public class UdpManager {
 
     public void save(BencodeObject recv, int type) {
         StringBuilder sb = new StringBuilder();
-        byte[] bytes = recv.get("a").get("info_hash").castB();
+        byte[] bytes = recv.get("a").get("info_hash").castToBytes();
         for (byte a : bytes) {
             sb.append(String.format("%02X", a));
         }

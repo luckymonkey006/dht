@@ -1,7 +1,6 @@
 package com.github.fengleicn.dht.bencode;
 
 import com.github.fengleicn.dht.utils.DhtUtil;
-import org.junit.Test;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
@@ -14,7 +13,7 @@ import java.util.Set;
  * BencodeObject bencodeObject = ...;
  * bencodeObject.get(int, byte[], String) => bencodeObject;
  * bencodeObject.fetch() => map, list, bigInteger, byte[];
- * bencodeObject.castI/L/S => int, long, String of bencodeObject;
+ * bencodeObject.castInt/L/S => int, long, String of bencodeObject;
  * bencodeObject.set(int, long, string, byte[], map<byte[], BencodeObject>, list<BencodeObject>)
  * bencodeObject.put/add(...)
  */
@@ -95,47 +94,28 @@ public class BencodeObject {
         return (T) data;
     }
 
-    public byte[] castB() {
+    public byte[] castToBytes() {
         return (byte[]) data;
     }
 
-    public long castL() {
-        return ((BigInteger) data).longValue();
+    public enum BencodeObjType {
+        MAP, LIST, BYTES, BIG_INTEGER, ERROR
     }
 
-    public int castI() {
-        return Math.toIntExact(castL());
-    }
-
-    public String castS() {
-        byte[] bytes = fetch();
-        return new String(bytes, UNICODE_UTF8);
-    }
-
-    public final static String MAP = "Map";
-    public final static String LIST = "List";
-    public final static String BYTES = "byte[]";
-    public final static String BIG_INTEGER = "BigInteger";
-    public final static String ERROR = "null";
-
-    String type() {
+    BencodeObjType type() {
         if (data instanceof Map) {
-            return MAP;
+            return BencodeObjType.MAP;
         } else if (data instanceof List) {
-            return LIST;
+            return BencodeObjType.LIST;
         } else if (data instanceof BigInteger) {
-            return BIG_INTEGER;
+            return BencodeObjType.BIG_INTEGER;
         } else if (data instanceof byte[]) {
-            return BYTES;
+            return BencodeObjType.BYTES;
         } else {
-            return ERROR;
+            return BencodeObjType.ERROR;
         }
     }
 
-    @Test
-    public void test001() {
-
-    }
 
     @Override
     public String toString() {
