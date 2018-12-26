@@ -10,6 +10,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.Date;
 
 import static com.github.fengleicn.dht.utils.Utils.*;
 
@@ -65,11 +66,12 @@ class UdpNetworkContoller {
     }
 
     public void addLog(String title, byte[] bytes, String ip, String port) throws IOException {
-        log.append("[").append(title).append("]  " + System.currentTimeMillis() + "  ");
+        log.append("[").append(title).append("]  " + new Date().toString() + "  ");
         log.append(ip);
         log.append(":").append(port);
         log.append("\n");
-        log.append(getOrignalBytesString(bytes));
+        log.append("      ").append(getOrignalBytesString(bytes));
         log.append("\n");
+        log.flush();
     }
 }
