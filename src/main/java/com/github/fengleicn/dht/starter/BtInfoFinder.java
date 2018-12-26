@@ -27,7 +27,7 @@ public class BtInfoFinder {
     public BtInfoFinder(String ip, int port) throws SocketException, UnknownHostException {
         this.localPort = port;
         localKBucketNode = new KBucketNode(Utils.randomBytes(20), Utils.getBytesFromHost(ip), Utils.getBytesFromInt(port));
-        System.out.println("DEBUG ip: " + Arrays.toString(localKBucketNode.ip));
+        System.out.println("[DEBUG]  ip address is " + Arrays.toString(localKBucketNode.ip));
         networkController = new UdpNetworkContoller(new DatagramSocket(port));
         KBucket kBucket = new KBucket(localKBucketNode);
         udpManager = new UdpManager(kBucket);
