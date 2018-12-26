@@ -11,6 +11,8 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 
+import static com.github.fengleicn.dht.utils.Utils.*;
+
 public
 /**
  * author Lei Feng
@@ -60,7 +62,7 @@ class UdpNetworkContoller {
     }
 
     public void printBytes(byte[] recvBytes) {
-        System.err.println("Original: " + BencodeObject.getOrignalBytesString(recvBytes));
-        System.err.println("Masked:   " + BencodeObject.getMaskedBytesString(recvBytes));
+        System.err.println("Original: " + getOrignalBytesString(recvBytes));
+        System.err.println("Masked:   " + getMaskedBytesString(recvBytes));
     }
 }

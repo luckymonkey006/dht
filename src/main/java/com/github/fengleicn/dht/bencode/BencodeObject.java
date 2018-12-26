@@ -1,6 +1,6 @@
 package com.github.fengleicn.dht.bencode;
 
-import com.github.fengleicn.dht.utils.DhtUtil;
+import com.github.fengleicn.dht.utils.Utils;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
@@ -8,15 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Usage:
- * BencodeObject bencodeObject = ...;
- * bencodeObject.get(int, byte[], String) => bencodeObject;
- * bencodeObject.fetch() => map, list, bigInteger, byte[];
- * bencodeObject.castInt/L/S => int, long, String of bencodeObject;
- * bencodeObject.set(int, long, string, byte[], map<byte[], BencodeObject>, list<BencodeObject>)
- * bencodeObject.put/add(...)
- */
+import static com.github.fengleicn.dht.utils.Utils.getOrignalBytesString;
+
 public class BencodeObject {
     private Object data;
     public final static Charset UNICODE_UTF8 = Charset.forName("UTF8");
@@ -32,7 +25,7 @@ public class BencodeObject {
         if (data instanceof List) {
             ((List<BencodeObject>) data).add(new BencodeObject().set(o));
         } else {
-            throw new RuntimeException("not a list");
+            throw new RuntimeException("[ERROR] data is not a list");
         }
     }
 
@@ -41,7 +34,7 @@ public class BencodeObject {
         if (data instanceof Map) {
             ((Map<byte[], BencodeObject>) data).put(k, new BencodeObject(o));
         } else {
-            throw new RuntimeException("not a map");
+            throw new RuntimeException("[ERROR] data is not a map");
         }
     }
 
@@ -72,7 +65,7 @@ public class BencodeObject {
         Map<byte[], BencodeObject> map = ((Map<byte[], BencodeObject>) data);
         Set<byte[]> keySet = map.keySet();
         for (byte[] key : keySet) {
-            if (DhtUtil.byteArraysEqual(k, key)) {
+            if (Utils.isBytesEqual(k, key)) {
                 return map.get(key);
             }
         }
@@ -151,29 +144,5 @@ public class BencodeObject {
         }
     }
 
-    public static String getOrignalBytesString(byte[] bytes){
-        byte[] copy = bytes.clone();
-        for (int i = 0; i < copy.length; i++) {
-            byte b = copy[i];
-            b = b >= ' ' && b <= '~' ? b : (byte) '.';
-            if(b == '\n' || b == '\t' || b == '\r' || b == '\f'){
-                b = '.';
-            }
-            copy[i] = b;
-        }
-        return new String(copy);
-    }
 
-    public static String getMaskedBytesString(byte[] bytes){
-        byte[] copy = bytes.clone();
-        for (int i = 0; i < copy.length; i++) {
-            byte b = copy[i];
-            b = b >= ' ' && b <= '~' ? (byte) ' ' : (byte) '*' ;
-            if(b == '\n' || b == '\t' || b == '\r' || b == '\f'){
-                b = '*';
-            }
-            copy[i] = b;
-        }
-        return new String(copy);
-    }
 }

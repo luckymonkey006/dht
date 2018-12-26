@@ -3,7 +3,7 @@ package com.github.fengleicn.dht.subsystem;
 import com.github.fengleicn.dht.node.KBucketNode;
 import com.github.fengleicn.dht.packet.UdpPacket;
 import com.github.fengleicn.dht.utils.KBucket;
-import com.github.fengleicn.dht.utils.DhtUtil;
+import com.github.fengleicn.dht.utils.Utils;
 
 import java.net.InetSocketAddress;
 
@@ -22,6 +22,6 @@ public class NodeInfo {
 
     public UdpPacket getRandomFindNodePacket(byte[] transId, KBucketNode localKBucketNode, byte[] targetId) throws Exception {
         KBucketNode KBucketNode = kBucket.getRandomNode();
-        return DhtUtil.findNode(transId, localKBucketNode.nodeId, targetId, new InetSocketAddress(KBucketNode.getIp(), KBucketNode.getPort()));
+        return Utils.findNode(transId, localKBucketNode.nodeId, targetId, new InetSocketAddress(KBucketNode.getIp(), KBucketNode.getPort()));
     }
 }

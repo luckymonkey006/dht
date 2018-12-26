@@ -1,6 +1,6 @@
 package com.github.fengleicn.dht.subsystem;
 
-import com.github.fengleicn.dht.utils.DhtUtil;
+import com.github.fengleicn.dht.utils.Utils;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,8 +21,8 @@ public class ExtendBepNo9 {
                 19, 66, 105, 116, 84, 111, 114, 114, 101, 110, 116, 32, 112, 114,
                 111, 116, 111, 99, 111, 108, 0, 0, 0, 0, 0, 16, 0, 0,
         };
-        byte[] infoHashByte = DhtUtil.hexToByteArray(infoHash);
-        byte[] peerId = DhtUtil.randomByteArray(20);
+        byte[] infoHashByte = Utils.getBytesFromHex(infoHash);
+        byte[] peerId = Utils.randomBytes(20);
         byte[] handShakeHeader = ByteBuffer.allocate(68).put(prefix).put(infoHashByte).put(peerId).array();
 
         outputStream.write(handShakeHeader);
@@ -31,7 +31,7 @@ public class ExtendBepNo9 {
         byte[] remoteHSHeader = new byte[68];
         inputStream.read(remoteHSHeader);
 
-        if (!DhtUtil.byteArraysEqual(Arrays.copyOfRange(remoteHSHeader, 0, 20), Arrays.copyOfRange(prefix, 0, 20)) || remoteHSHeader[25] != 16) {
+        if (!Utils.isBytesEqual(Arrays.copyOfRange(remoteHSHeader, 0, 20), Arrays.copyOfRange(prefix, 0, 20)) || remoteHSHeader[25] != 16) {
             return null;
         }
 
@@ -95,7 +95,7 @@ public class ExtendBepNo9 {
             }
             byte[] pattern = new byte[5];
             inputStream.read(pattern);
-            if (DhtUtil.byteArraysEqual(pattern, ":name".getBytes())) {
+            if (Utils.isBytesEqual(pattern, ":name".getBytes())) {
                 StringBuilder sb = new StringBuilder();
                 for (; ; ) {
                     int c = inputStream.read();

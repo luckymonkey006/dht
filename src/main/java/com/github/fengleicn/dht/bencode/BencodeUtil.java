@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static com.github.fengleicn.dht.bencode.BencodeObject.UNICODE_UTF8;
+import static com.github.fengleicn.dht.utils.Utils.*;
 
 public class BencodeUtil {
     static class BencodeObjectWrapper {
@@ -114,7 +115,7 @@ public class BencodeUtil {
                 for (Map.Entry<byte[], BencodeObject> entry : treeMap.entrySet()) {
                     ret = bytesConcat(ret,
                             String.valueOf(entry.getKey().length).getBytes(UNICODE_UTF8),
-                            charToByteArray(':'),
+                            getBytesFromChar(':'),
                             entry.getKey(),
                             toBencodeString(entry.getValue()));
                 }
@@ -128,11 +129,11 @@ public class BencodeUtil {
                 break;
             case BYTES:
                 byte[] bytes = bencodeObject.fetch();
-                ret = bytesConcat(("" + bytes.length).getBytes(UNICODE_UTF8), charToByteArray(':'), bytes);
+                ret = bytesConcat(("" + bytes.length).getBytes(UNICODE_UTF8), getBytesFromChar(':'), bytes);
                 break;
             case BIG_INTEGER:
                 BigInteger i = bencodeObject.fetch();
-                ret = bytesConcat(charToByteArray('i'), i.toString().getBytes(UNICODE_UTF8));
+                ret = bytesConcat(getBytesFromChar('i'), i.toString().getBytes(UNICODE_UTF8));
                 break;
             case ERROR:
                 throw new RuntimeException("[ERROR] BencodeObject has a error.");
@@ -142,22 +143,5 @@ public class BencodeUtil {
         return ret;
     }
 
-    private static byte[] bytesConcat(byte[]... bytesArg) {
-        byte[] ret = {};
-        for (byte[] i : bytesArg) {
-            ret = bytesConcat0(ret, i);
-        }
-        return ret;
-    }
 
-    private static byte[] bytesConcat0(byte[] head, byte[] tail) {
-        byte[] result = new byte[head.length + tail.length];
-        System.arraycopy(head, 0, result, 0, head.length);
-        System.arraycopy(tail, 0, result, head.length, tail.length);
-        return result;
-    }
-
-    private static byte[] charToByteArray(char character) {
-        return Character.toString(character).getBytes(UNICODE_UTF8);
-    }
 }

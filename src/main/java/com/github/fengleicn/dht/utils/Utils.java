@@ -12,60 +12,42 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
-public class DhtUtil {
+import static com.github.fengleicn.dht.bencode.BencodeObject.UNICODE_UTF8;
+
+public class Utils {
 
     public static final Random random = new Random();
 
-    public static byte[] hostToByte(String host) throws UnknownHostException {
+    public static byte[] getBytesFromHost(String host) throws UnknownHostException {
         return InetAddress.getByName(host).getAddress();
     }
 
-    public static byte[] portToByte(int port){
+    public static String getHostIpFromBytes(byte[] bytes) {
+        return (bytes[0] & 0xFF) + "." + (bytes[1] & 0xFF) + "."
+                + (bytes[2] & 0xFF) + "." + (bytes[3] & 0xFF);
+    }
+
+    public static byte[] getBytesFromInt(int port) {
         return new byte[]{(byte) (port / 256), (byte) (port % 256)};
     }
 
-    public static String byteToIp(byte[] buf) {
-        return (buf[0] & 0xFF) + "." + (buf[1] & 0xFF) + "."
-                + (buf[2] & 0xFF) + "." + (buf[3] & 0xFF);
-    }
-
-    public static String byteToPort(byte[] buf) {
-        if (buf.length == 2)
-            return ((buf[0] & 0xFF) << 8) + (buf[1] & 0xFF) + "";
+    public static String getIntFromBytes(byte[] bytes) {
+        if (bytes.length == 2)
+            return ((bytes[0] & 0xFF) << 8) + (bytes[1] & 0xFF) + "";
         else
-            return ((buf[4] & 0xFF) << 8) + (buf[5] & 0xFF) + "";
+            return ((bytes[4] & 0xFF) << 8) + (bytes[5] & 0xFF) + "";
     }
 
-    public static String ByteToHexStr(byte[] Hex) {
-        return DatatypeConverter.printHexBinary(Hex);
-    }
-
-    public static byte[] hexToByteArray(String hex) {
+    public static byte[] getBytesFromHex(String hex) {
         return DatatypeConverter.parseHexBinary(hex);
     }
 
-    public static boolean byteArraysEqual(byte[] a, byte[] b){
-        if(a == null || b == null || a.length != b.length)
-            return false;
-        for(int i = 0; i < a.length; i++){
-            if(a[i] != b[i])
-                return false;
-        }
-        return true;
-    }
-
-    public static byte[] randomByteArray(int len) {
-        byte[] b = new byte[len];
-        random.nextBytes(b);
-        return b;
-    }
-
-    public static List<KBucketNode> decodeNodes(byte[] buf) throws Exception {
+    public static List<KBucketNode> getNodesFromBytes(byte[] buf) throws Exception {
         int len = buf.length;
         int ptr = 0, nodeLen = 26;
         List<KBucketNode> list = new ArrayList<>();
         if (len % nodeLen != 0) {
-            throw new Exception("node length is wrong");
+            throw new Exception("[ERROR] nodes-id's length isn't 26*N");
         }
         while (ptr < buf.length) {
             list.add(new KBucketNode(Arrays.copyOfRange(buf, ptr, ptr + nodeLen)));
@@ -74,7 +56,7 @@ public class DhtUtil {
         return list;
     }
 
-    public static byte[] encodeNodes(List<KBucketNode> KBucketNodes) {
+    public static byte[] getBytesFromNodes(List<KBucketNode> KBucketNodes) {
         if (KBucketNodes == null || KBucketNodes.size() == 0)
             return null;
         int ptr = 0, nodeLen = 26;
@@ -88,6 +70,68 @@ public class DhtUtil {
             ptr += 26;
         }
         return ret;
+    }
+
+    public static byte[] getBytesFromChar(char character) {
+        return Character.toString(character).getBytes(UNICODE_UTF8);
+    }
+
+    public static String getOrignalBytesString(byte[] bytes){
+        byte[] copy = bytes.clone();
+        for (int i = 0; i < copy.length; i++) {
+            byte b = copy[i];
+            b = b >= ' ' && b <= '~' ? b : (byte) '.';
+            if(b == '\n' || b == '\t' || b == '\r' || b == '\f'){
+                b = '.';
+            }
+            copy[i] = b;
+        }
+        return new String(copy);
+    }
+
+    public static String getMaskedBytesString(byte[] bytes){
+        byte[] copy = bytes.clone();
+        for (int i = 0; i < copy.length; i++) {
+            byte b = copy[i];
+            b = b >= ' ' && b <= '~' ? (byte) ' ' : (byte) '*' ;
+            if(b == '\n' || b == '\t' || b == '\r' || b == '\f'){
+                b = '*';
+            }
+            copy[i] = b;
+        }
+        return new String(copy);
+    }
+
+    public static byte[] bytesConcat(byte[]... bytesArg) {
+        byte[] ret = {};
+        for (byte[] i : bytesArg) {
+            ret = bytesConcat0(ret, i);
+        }
+        return ret;
+    }
+
+    public static byte[] bytesConcat0(byte[] head, byte[] tail) {
+        byte[] result = new byte[head.length + tail.length];
+        System.arraycopy(head, 0, result, 0, head.length);
+        System.arraycopy(tail, 0, result, head.length, tail.length);
+        return result;
+    }
+
+    public static boolean isBytesEqual(byte[] bytes1, byte[] bytes2) {
+        if (bytes1 == null || bytes2 == null || bytes1.length != bytes2.length)
+            return false;
+        for (int i = 0; i < bytes1.length; i++) {
+            if (bytes1[i] != bytes2[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static byte[] randomBytes(int len) {
+        byte[] b = new byte[len];
+        random.nextBytes(b);
+        return b;
     }
 
     // Request: ping, find_node, get_peer, announce_peer
@@ -164,7 +208,7 @@ public class DhtUtil {
             put("y", new BencodeObject("r"));
             put("r", new BencodeObject(new BencodeHashMap() {{
                 put("id", new BencodeObject(nodeId));
-                put("KBucketNodes", new BencodeObject(encodeNodes(KBucketNodes)));
+                put("nodes", new BencodeObject(getBytesFromNodes(KBucketNodes)));
             }}));
         }});
         return new UdpPacket(socketAddress, bencodeObject);

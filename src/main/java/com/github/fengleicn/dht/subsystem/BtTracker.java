@@ -2,7 +2,7 @@ package com.github.fengleicn.dht.subsystem;
 
 import com.github.fengleicn.dht.node.KBucketNode;
 import com.github.fengleicn.dht.starter.BtInfoFinder;
-import com.github.fengleicn.dht.utils.DhtUtil;
+import com.github.fengleicn.dht.utils.Utils;
 import org.assertj.core.util.Lists;
 
 import java.io.FileWriter;
@@ -218,8 +218,8 @@ public class BtTracker {
 
         buf = ByteBuffer.allocate(104)
                 .put(connIdRecvBytes).putInt(1)
-                .putInt(TRANS_ID).put(DhtUtil.hexToByteArray(infoHash))
-                .put(DhtUtil.randomByteArray(20)).put(zeroByte36)
+                .putInt(TRANS_ID).put(Utils.getBytesFromHex(infoHash))
+                .put(Utils.randomBytes(20)).put(zeroByte36)
                 .putInt(TRANS_ID).putInt(256).put(zeroByte4).array();
         packet = new DatagramPacket(buf, buf.length, new InetSocketAddress(host, port));
         datagramSocket.send(packet);
@@ -239,10 +239,10 @@ public class BtTracker {
         datagramSocket.close();
         for (int i = 20; i + 6 <= packetLength; i += 6) {
             byte[] remoteAddress = Arrays.copyOfRange(buf, i, i + 6);
-            if (blackListSet.contains(DhtUtil.byteToIp(remoteAddress) + ":" + DhtUtil.byteToPort(remoteAddress)))
+            if (blackListSet.contains(Utils.getHostIpFromBytes(remoteAddress) + ":" + Utils.getIntFromBytes(remoteAddress)))
                 continue;
-            String peerIp = DhtUtil.byteToIp(remoteAddress);
-            int peerPort = Integer.parseInt(DhtUtil.byteToPort(remoteAddress));
+            String peerIp = Utils.getHostIpFromBytes(remoteAddress);
+            int peerPort = Integer.parseInt(Utils.getIntFromBytes(remoteAddress));
             addrList.add(peerIp + ":" + peerPort);
         }
     }
