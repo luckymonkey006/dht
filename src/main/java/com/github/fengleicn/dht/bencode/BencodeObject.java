@@ -13,14 +13,14 @@ import java.util.Set;
  * Usage:
  * BencodeObject bencodeObject = ...;
  * bencodeObject.get(int, byte[], String) => bencodeObject;
- * bencodeObject.cast() => map, list, bigInteger, byte[];
+ * bencodeObject.fetch() => map, list, bigInteger, byte[];
  * bencodeObject.castI/L/S => int, long, String of bencodeObject;
  * bencodeObject.set(int, long, string, byte[], map<byte[], BencodeObject>, list<BencodeObject>)
  * bencodeObject.put/add(...)
  */
 public class BencodeObject {
     private Object data;
-    public final static Charset DEFAULT_CHARSET = Charset.forName("UTF8");
+    public final static Charset UNICODE_UTF8 = Charset.forName("UTF8");
 
     public BencodeObject() {
     }
@@ -47,14 +47,14 @@ public class BencodeObject {
     }
 
     public <T> void put(String k, T o) {
-        put(k.getBytes(DEFAULT_CHARSET), o);
+        put(k.getBytes(UNICODE_UTF8), o);
     }
 
     public <T> BencodeObject set(T o) {
         if (o instanceof List || o instanceof Map || o instanceof BigInteger || o instanceof byte[]) {
             data = o;
         } else if (o instanceof String) {
-            data = ((String) o).getBytes(DEFAULT_CHARSET);
+            data = ((String) o).getBytes(UNICODE_UTF8);
         } else if (o instanceof Number) {
             if (o instanceof Double || o instanceof Float)
                 throw new RuntimeException("illegal arg");
@@ -82,7 +82,7 @@ public class BencodeObject {
     }
 
     public BencodeObject get(String k) {
-        byte[] key = k.getBytes(DEFAULT_CHARSET);
+        byte[] key = k.getBytes(UNICODE_UTF8);
         return get(key);
     }
 
@@ -91,7 +91,7 @@ public class BencodeObject {
         return list.get(k);
     }
 
-    public <T> T cast() {
+    public <T> T fetch() {
         return (T) data;
     }
 
@@ -108,15 +108,15 @@ public class BencodeObject {
     }
 
     public String castS() {
-        byte[] bytes = cast();
-        return new String(bytes, DEFAULT_CHARSET);
+        byte[] bytes = fetch();
+        return new String(bytes, UNICODE_UTF8);
     }
 
     public final static String MAP = "Map";
     public final static String LIST = "List";
-    public final static String BTARR = "byte[]";
-    public final static String BINT = "BigInteger";
-    public final static String ERR = "null";
+    public final static String BYTES = "byte[]";
+    public final static String BIG_INTEGER = "BigInteger";
+    public final static String ERROR = "null";
 
     String type() {
         if (data instanceof Map) {
@@ -124,11 +124,11 @@ public class BencodeObject {
         } else if (data instanceof List) {
             return LIST;
         } else if (data instanceof BigInteger) {
-            return BINT;
+            return BIG_INTEGER;
         } else if (data instanceof byte[]) {
-            return BTARR;
+            return BYTES;
         } else {
-            return ERR;
+            return ERROR;
         }
     }
 
@@ -143,7 +143,7 @@ public class BencodeObject {
         if (data instanceof Map) {
             sb.append("{");
             for (Map.Entry<byte[], BencodeObject> e : ((Map<byte[], BencodeObject>) data).entrySet()) {
-                sb.append(new String(e.getKey(), DEFAULT_CHARSET));
+                sb.append(new String(e.getKey(), UNICODE_UTF8));
                 sb.append(" : ");
                 sb.append(e.getValue().toString());
                 sb.append(" , ");
@@ -155,7 +155,7 @@ public class BencodeObject {
             sb.append("[");
             for (BencodeObject o : ((List<BencodeObject>) data)) {
                 if (o.data instanceof byte[]) {
-                    sb.append(new String(o.cast(), DEFAULT_CHARSET));
+                    sb.append(new String(o.fetch(), UNICODE_UTF8));
                 } else {
                     sb.append(o.toString());
                 }
@@ -165,7 +165,7 @@ public class BencodeObject {
             sb.append("]");
             return sb.toString();
         }else if (data instanceof byte[]) {
-            return new String(((byte[]) data), DEFAULT_CHARSET);
+            return new String(((byte[]) data), UNICODE_UTF8);
         } else {
             return data.toString();
         }

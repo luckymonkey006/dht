@@ -38,7 +38,7 @@ class UdpNetworkContoller {
 
     public void send(UdpPacket udpPacket) throws IOException {
         BencodeObject bencodeObject = udpPacket.bencodeObject;
-        byte[] b = BencodeUtil.encode(bencodeObject);
+        byte[] b = BencodeUtil.toBencodeString(bencodeObject);
         printByte(sendWriter, b, udpPacket.address.getHostString(), udpPacket.address.getPort());
         datagramSocket.send(new DatagramPacket(b, b.length, udpPacket.address));
     }
@@ -51,7 +51,7 @@ class UdpNetworkContoller {
         printByte(recvWriter, b, packet.getAddress().getHostAddress(), packet.getPort());
         BencodeObject bencodeObject;
         try {
-            bencodeObject = BencodeUtil.decode(b);
+            bencodeObject = BencodeUtil.parse(b);
         }catch (Exception e){
             byte[] p = b.clone();
             for (int i = 0; i < p.length; i++) {

@@ -26,18 +26,18 @@ public class UdpManager {
             BencodeObject b = p.bencodeObject;
             InetSocketAddress remoteSocketAddress = p.address;
             if (b.get("y").castB()[0] == 'q') {
-                String q = new String(b.get("q").castB(), BencodeObject.DEFAULT_CHARSET);
+                String q = new String(b.get("q").castB(), BencodeObject.UNICODE_UTF8);
                 switch (q) {
                     case "ping":
-                        byte[] transId = b.get("t").cast();
+                        byte[] transId = b.get("t").fetch();
                         return DhtUtil.rspPing(transId, localNodeId, remoteSocketAddress);
                     case "find_node":
-                        transId = b.get("t").cast();
-                        byte[] target = b.get("a").get("target").cast();
+                        transId = b.get("t").fetch();
+                        byte[] target = b.get("a").get("target").fetch();
                         List<KBucketNode> KBucketNodes = kBucket.get(new KBucketNode(target, null, null));
                         return DhtUtil.rspFindNode(transId, localNodeId, KBucketNodes, remoteSocketAddress);
                     case "get_peers":
-                        byte[] bytes = b.get("a").get("info_hash").cast();
+                        byte[] bytes = b.get("a").get("info_hash").fetch();
                         StringBuilder sb = new StringBuilder();
                         for (byte a : bytes) {
                             sb.append(String.format("%02X", a));

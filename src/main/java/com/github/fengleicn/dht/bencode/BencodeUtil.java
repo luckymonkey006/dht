@@ -1,7 +1,5 @@
 package com.github.fengleicn.dht.bencode;
 
-import org.apache.http.client.utils.URLEncodedUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -10,146 +8,153 @@ import java.util.*;
 // for Bencode encoding / decoding
 public class BencodeUtil {
     static class BencodeObjectWrapper {
-        public BencodeObject bencodeObject;
+        BencodeObject bencodeObject;
+
+        public BencodeObject getValue() {
+            return bencodeObject;
+        }
+
+        public BencodeObject setValue(BencodeObject bencodeObject) {
+            this.bencodeObject = bencodeObject;
+            return bencodeObject;
+        }
     }
 
-    public static BencodeObject decode(final byte[] src) throws IOException {
+    public static BencodeObject parse(final byte[] src) throws IOException {
         BencodeObjectWrapper bencodeObjectWrapper = new BencodeObjectWrapper();
-        findNext(src, 0, bencodeObjectWrapper);
+        next(src, 0, bencodeObjectWrapper);
         return bencodeObjectWrapper.bencodeObject;
     }
 
-    public static int findNext(final byte[] src, final int ptr, final BencodeObjectWrapper bencodeObjectWrapper) {
-        byte header = src[ptr];
-        BencodeObject v = (bencodeObjectWrapper.bencodeObject = new BencodeObject());
-        int next = ptr;
-        switch (header) {
+    public static int next(final byte[] bencodeString, final int start, final BencodeObjectWrapper bencodeObjectWrapper) {
+        byte firstByte = bencodeString[start];
+        BencodeObject bencodeObj = new BencodeObject();
+        bencodeObjectWrapper.setValue(bencodeObj);
+        int pointer = start;
+        switch (firstByte) {
             case 'd':
-                next++;
-                v.set(new HashMap<byte[], BencodeObject>());
-                while (src[next] != 'e') {
-                    BencodeObjectWrapper wrapper = new BencodeObjectWrapper();
-                    next = findNext(src, next, wrapper);
-                    byte[] key = wrapper.bencodeObject.cast();
-                    next = findNext(src, next, wrapper);
-                    v.put(key, wrapper.bencodeObject);
+                pointer++;
+                bencodeObj.set(new LinkedHashMap<byte[], BencodeObject>());
+                while (bencodeString[pointer] != 'e') {
+                    BencodeObjectWrapper bencodeObjWrapper = new BencodeObjectWrapper();
+                    pointer = next(bencodeString, pointer, bencodeObjWrapper);
+                    byte[] key = bencodeObjWrapper.bencodeObject.fetch();
+                    pointer = next(bencodeString, pointer, bencodeObjWrapper);
+                    bencodeObj.put(key, bencodeObjWrapper.bencodeObject);
                 }
-                return ++next;
+                return pointer + 1;
             case 'l':
-                next++;
-                v.set(new ArrayList<BencodeObject>());
-                while (src[next] != 'e') {
-                    BencodeObjectWrapper w = new BencodeObjectWrapper();
-                    next = findNext(src, next, w);
-                    v.add(w.bencodeObject);
+                pointer++;
+                bencodeObj.set(new ArrayList<BencodeObject>());
+                while (bencodeString[pointer] != 'e') {
+                    pointer = next(bencodeString, pointer, bencodeObjectWrapper);
+                    bencodeObj.add(bencodeObjectWrapper.bencodeObject);
                 }
-                return ++next;
+                return pointer + 1;
             case 'i':
-                next++;
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                pointer++;
+                ByteArrayOutputStream bytesOs = new ByteArrayOutputStream();
                 byte b;
-                while ((b = src[next]) != 'e') {
+                while ((b = bencodeString[pointer]) != 'e') {
                     if (b != '-' && !(b >= '0' && b <= '9')) {
-                        throw new RuntimeException("error in BencodeUtil.findNext(int) token: " + b);
+                        throw new RuntimeException("[ERROR] BencodeUtil.next(). The field token is  " + b);
                     }
-                    byteArrayOutputStream.write(b);
-                    next++;
+                    bytesOs.write(b);
+                    pointer++;
                 }
-                byte[] num = byteArrayOutputStream.toByteArray();
-                if (num[0] == '-' && num[1] == '0' // -0123
-                        || num[0] == '0' && num.length != '0') // 0123
-                    throw new RuntimeException("error in BencodeUtil.findNext(int) [num]: " + num);
-                v.set(new BigInteger(new String(num, BencodeObject.DEFAULT_CHARSET)));
-                return ++next;
+                byte[] number = bytesOs.toByteArray();
+                if (number[0] == '-' && number[1] == '0' || number[0] == '0' && number.length != 1) {
+                    throw new RuntimeException("[ERROR] BencodeUtil.next(). The field num is " + number);
+                }
+                bencodeObj.set(new BigInteger(new String(number, BencodeObject.UNICODE_UTF8)));
+                return pointer + 1;
             default:
-                if(header == '0'){
-                      v.set(new byte[0]);
-                      return next + 2;
-                } else if (header >= '1' && header <= '9') {
-                    byteArrayOutputStream = new ByteArrayOutputStream();
-                    while ((b = src[next]) != ':') {
+                if (firstByte == '0') {
+                    bencodeObj.set(new byte[0]);
+                    return pointer + 2;
+                } else if (firstByte >= '1' && firstByte <= '9') {
+                    bytesOs = new ByteArrayOutputStream();
+                    while ((b = bencodeString[pointer]) != ':') {
                         if (!(b >= '0' && b <= '9')) {
-                            throw new RuntimeException("error in BencodeUtil.findNext(int) token: " + b);
+                            throw new RuntimeException("[ERROR] BencodeUtil.next(). The field token is " + b);
                         }
-                        byteArrayOutputStream.write(b);
-                        next++;
+                        bytesOs.write(b);
+                        pointer++;
                     }
-                    num = byteArrayOutputStream.toByteArray();
-                    if (num[0] == '0')
-                        throw new RuntimeException("error in BencodeUtil.findNext(byte) [num]: " + num);
-                    next++;
-                    int len = Integer.valueOf(new String(num, BencodeObject.DEFAULT_CHARSET));
-                    v.set(Arrays.copyOfRange(src, next, next + len));
-                    return next + len;
+                    number = bytesOs.toByteArray();
+                    if (number[0] == '0')
+                        throw new RuntimeException("[ERROR] BencodeUtil.next(). The field num is " + number);
+                    pointer++;
+                    int len = Integer.valueOf(new String(number, BencodeObject.UNICODE_UTF8));
+                    bencodeObj.set(Arrays.copyOfRange(bencodeString, pointer, pointer + len));
+                    return pointer + len;
                 } else {
-                    throw new RuntimeException("error in BencodeUtil.findNext: header == " + header);
+                    throw new RuntimeException("[ERROR] BencodeUtil.next() occurrences error. The field firstByte is " + firstByte);
                 }
         }
     }
 
-    // encode
-    public static byte[] encode(BencodeObject bencodeObject) {
+
+    public static byte[] toBencodeString(BencodeObject bencodeObject) {
         byte[] ret = {};
         switch (bencodeObject.type()) {
             case BencodeObject.MAP:
                 ret = new byte[]{'d'};
-                Map<byte[], BencodeObject> map = bencodeObject.cast();
-                TreeMap<byte[], BencodeObject> treeMap = new TreeMap<>((o1, o2) -> {
-                    int len = o1.length > o2.length ? o2.length : o1.length;
-                    for (int i = 0; i < len; i++) {
-                        if (o1[i] == o2[i]) {
-                            continue;
-                        } else {
-                            return o1[i] - o2[i];
+                Map<byte[], BencodeObject> map = bencodeObject.fetch();
+                TreeMap<byte[], BencodeObject> treeMap = new TreeMap<>((byteArray1, byteArray2) -> {
+                    int minLength = Math.min(byteArray1.length, byteArray2.length);
+                    for (int i = 0; i < minLength; i++) {
+                        if (byteArray1[i] != byteArray2[i]) {
+                            return byteArray1[i] - byteArray2[i];
                         }
                     }
                     return 0;
                 });
                 treeMap.putAll(map);
                 for (Map.Entry<byte[], BencodeObject> entry : treeMap.entrySet()) {
-                    ret = concat(ret,
-                            String.valueOf(entry.getKey().length).getBytes(BencodeObject.DEFAULT_CHARSET),
+                    ret = bytesConcat(ret,
+                            String.valueOf(entry.getKey().length).getBytes(BencodeObject.UNICODE_UTF8),
                             new byte[]{':'},
                             entry.getKey(),
-                            encode(entry.getValue()));
+                            toBencodeString(entry.getValue()));
                 }
                 break;
             case BencodeObject.LIST:
                 ret = new byte[]{'l'};
-                List<BencodeObject> list = bencodeObject.cast();
+                List<BencodeObject> list = bencodeObject.fetch();
                 for (BencodeObject b : list) {
-                    ret = concat(ret, encode(b));
+                    ret = bytesConcat(ret, toBencodeString(b));
                 }
                 break;
-            case BencodeObject.BTARR:
-                byte[] bytes = bencodeObject.cast();
-                ret = concat(String.valueOf(bytes.length).getBytes(BencodeObject.DEFAULT_CHARSET),
+            case BencodeObject.BYTES:
+                byte[] bytes = bencodeObject.fetch();
+                ret = bytesConcat(("" + bytes.length).getBytes(BencodeObject.UNICODE_UTF8),
                         new byte[]{':'}, bytes);
                 break;
-            case BencodeObject.BINT:
-                BigInteger i = bencodeObject.cast();
-                ret = concat(new byte[]{'i'}, i.toString().getBytes(BencodeObject.DEFAULT_CHARSET));
+            case BencodeObject.BIG_INTEGER:
+                BigInteger i = bencodeObject.fetch();
+                ret = bytesConcat(new byte[]{'i'}, i.toString().getBytes(BencodeObject.UNICODE_UTF8));
                 break;
-            case BencodeObject.ERR:
-                throw new RuntimeException("BencodeObject.Err");
+            case BencodeObject.ERROR:
+                throw new RuntimeException("[ERROR] BencodeObject");
         }
-        if (bencodeObject.type() != BencodeObject.BTARR)
-            ret = concat(ret, new byte[]{'e'});
+        if (!bencodeObject.type().equals(BencodeObject.BYTES))
+            ret = bytesConcat(ret, new byte[]{'e'});
         return ret;
     }
 
-    private static byte[] concat(byte[]... a) {
+    private static byte[] bytesConcat(byte[]... bytesArg) {
         byte[] ret = {};
-        for (byte[] i : a) {
-            ret = concat0(ret, i);
+        for (byte[] i : bytesArg) {
+            ret = bytesConcat0(ret, i);
         }
         return ret;
     }
 
-    private static byte[] concat0(byte[] a, byte[] b) {
-        byte[] c = new byte[a.length + b.length];
-        System.arraycopy(a, 0, c, 0, a.length);
-        System.arraycopy(b, 0, c, a.length, b.length);
-        return c;
+    private static byte[] bytesConcat0(byte[] head, byte[] tail) {
+        byte[] result = new byte[head.length + tail.length];
+        System.arraycopy(head, 0, result, 0, head.length);
+        System.arraycopy(tail, 0, result, head.length, tail.length);
+        return result;
     }
 }
