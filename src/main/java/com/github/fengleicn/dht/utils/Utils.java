@@ -7,6 +7,7 @@ import com.github.fengleicn.dht.packet.UdpPacket;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -76,12 +77,12 @@ public class Utils {
         return Character.toString(character).getBytes(UNICODE_UTF8);
     }
 
-    public static String getOrignalBytesString(byte[] bytes){
+    public static String getOrignalBytesString(byte[] bytes) {
         byte[] copy = bytes.clone();
         for (int i = 0; i < copy.length; i++) {
             byte b = copy[i];
             b = b >= ' ' && b <= '~' ? b : (byte) '.';
-            if(b == '\n' || b == '\t' || b == '\r' || b == '\f'){
+            if (b == '\n' || b == '\t' || b == '\r' || b == '\f') {
                 b = '.';
             }
             copy[i] = b;
@@ -89,12 +90,12 @@ public class Utils {
         return new String(copy);
     }
 
-    public static String getMaskedBytesString(byte[] bytes){
+    public static String getMaskedBytesString(byte[] bytes) {
         byte[] copy = bytes.clone();
         for (int i = 0; i < copy.length; i++) {
             byte b = copy[i];
-            b = b >= ' ' && b <= '~' ? (byte) ' ' : (byte) '*' ;
-            if(b == '\n' || b == '\t' || b == '\r' || b == '\f'){
+            b = b >= ' ' && b <= '~' ? (byte) ' ' : (byte) '*';
+            if (b == '\n' || b == '\t' || b == '\r' || b == '\f') {
                 b = '*';
             }
             copy[i] = b;
@@ -208,7 +209,9 @@ public class Utils {
             put("y", new BencodeObject("r"));
             put("r", new BencodeObject(new BencodeHashMap() {{
                 put("id", new BencodeObject(nodeId));
-                put("nodes", new BencodeObject(getBytesFromNodes(KBucketNodes)));
+                put("nodes", new BencodeObject(getBytesFromNodes(KBucketNodes) == null ?
+                        getBytesFromNodes(Collections.singletonList(new KBucketNode(randomBytes(20), randomBytes(4), randomBytes(2))))
+                        : getBytesFromNodes(KBucketNodes)));
             }}));
         }});
         return new UdpPacket(socketAddress, bencodeObject);
