@@ -105,7 +105,7 @@ public class TaskManager {
         }
     }
 
-    public void run() throws Exception {
+    public void startUp() throws Exception {
         initKBucketNodes();
         new Thread(this::findNodeTask, "FIND_NODE_THREAD").start();
         new Thread(this::getPeerTask, "GET_PEER_THREAD").start();

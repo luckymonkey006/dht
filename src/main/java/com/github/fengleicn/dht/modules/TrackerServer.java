@@ -4,6 +4,7 @@ import com.github.fengleicn.dht.utils.structs.KBucketNode;
 import com.github.fengleicn.dht.main.TaskManager;
 import com.github.fengleicn.dht.utils.Utils;
 import org.assertj.core.util.Lists;
+import org.junit.Test;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -38,9 +39,9 @@ public class TrackerServer {
         blackListSet.add("0.0.0.0:65535");
     }
 
-    public static void main(String[] args) throws InterruptedException, IOException {
+    @Test
+    public static void test001(String[] args) throws InterruptedException, IOException {
         new TrackerServer().request("EEB7C79987A49F3CA816A951C404350A83C23C3C");
-
     }
 
     public static void request(String infoHash) throws InterruptedException, IOException {
