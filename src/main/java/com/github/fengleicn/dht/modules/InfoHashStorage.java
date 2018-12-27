@@ -1,7 +1,5 @@
 package com.github.fengleicn.dht.modules;
 
-import com.github.fengleicn.dht.main.TaskManager;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -99,7 +97,7 @@ public class InfoHashStorage {
 
     public void recordMetaData(String infoHash, String fileName) {
         synchronized(this) {
-            if(infoHash.equalsIgnoreCase(TaskManager.GET_PEER_INFO_HASH))
+            if(infoHash.equalsIgnoreCase(StartUp.GET_PEER_INFO_HASH))
                 return;
             TorrentInfo torrentInfo = storage.get(infoHash);
             if (!fileName.equals(torrentInfo.fileName)) {

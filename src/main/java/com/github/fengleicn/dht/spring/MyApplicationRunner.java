@@ -1,6 +1,6 @@
 package com.github.fengleicn.dht.spring;
 
-import com.github.fengleicn.dht.main.TaskManager;
+import com.github.fengleicn.dht.modules.StartUp;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -12,6 +12,6 @@ public class MyApplicationRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        new TaskManager(myIp, Integer.valueOf(myPort)).startUp();
+        new StartUp(myIp, Integer.valueOf(myPort)).startUp();
     }
 }

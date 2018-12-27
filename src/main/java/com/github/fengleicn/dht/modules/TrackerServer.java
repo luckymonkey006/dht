@@ -1,7 +1,6 @@
 package com.github.fengleicn.dht.modules;
 
 import com.github.fengleicn.dht.utils.structs.KBucketNode;
-import com.github.fengleicn.dht.main.TaskManager;
 import com.github.fengleicn.dht.utils.Utils;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
@@ -45,7 +44,7 @@ public class TrackerServer {
     }
 
     public static void request(String infoHash) throws InterruptedException, IOException {
-        KBucketNode myKBucketNode = TaskManager.myKBucketNode;
+        KBucketNode myKBucketNode = StartUp.myKBucketNode;
         if (myKBucketNode != null)
             blackListSet.add(myKBucketNode.getIp() + ":" + myKBucketNode.getPort());
 

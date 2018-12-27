@@ -1,4 +1,4 @@
-package com.github.fengleicn.dht.main;
+package com.github.fengleicn.dht.modules;
 
 import com.github.fengleicn.dht.utils.structs.KBucketNode;
 import com.github.fengleicn.dht.utils.structs.UdpPacket;
@@ -9,7 +9,7 @@ import com.github.fengleicn.dht.utils.Utils;
 
 import java.net.*;
 
-public class TaskManager {
+public class StartUp {
     public static KBucketNode myKBucketNode;
     UdpContoller networkController;
     int myPort;
@@ -20,7 +20,7 @@ public class TaskManager {
     private static final int CHANGE_NODE_ID_MS = 2 * SEC;
     public static final String GET_PEER_INFO_HASH = "EEB7C79987A49F3CA816A951C404350A83C23C3C";
 
-    public TaskManager(String myIp, int myPort) throws SocketException, UnknownHostException {
+    public StartUp(String myIp, int myPort) throws SocketException, UnknownHostException {
         this.myPort = myPort;
         myKBucketNode = new KBucketNode(Utils.randomBytes(20), Utils.getBytesFromHost(myIp), Utils.getBytesFromInt(myPort));
         KBucket kBucket = new KBucket(myKBucketNode);
