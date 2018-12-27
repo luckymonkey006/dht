@@ -11,17 +11,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class UdpManager {
+public class UdpUtils {
     public static Map<String, Integer> get = new ConcurrentHashMap<>();
     public static Map<String, Integer> announce = new ConcurrentHashMap<>();
 
-    public KBucket kBucket;
+    public static KBucket kBucket;
 
-    public UdpManager(KBucket kBucket) {
-        this.kBucket = kBucket;
+    public static void set(KBucket kBucket) {
+        UdpUtils.kBucket = kBucket;
     }
 
-    public UdpPacket manage(UdpPacket p, byte[] localNodeId) {
+    public static UdpPacket createResp(UdpPacket p, byte[] localNodeId) {
         try {
             BencodeObject b = p.bencodeObject;
             InetSocketAddress remoteSocketAddress = p.address;
@@ -42,11 +42,11 @@ public class UdpManager {
                         for (byte a : bytes) {
                             sb.append(String.format("%02X", a));
                         }
-                        save(b, BtLibrary.GET);
+                        save(b, InfoHashStorage.GET);
                         break;
                     case "announce_peer":
                         transId = b.get("t").castToBytes();
-                        save(b, BtLibrary.ANNOUNCE);
+                        save(b, InfoHashStorage.ANNOUNCE);
                         return Utils.rspAnnouncePeer(transId, localNodeId, remoteSocketAddress); //TODO check token
                 }
             } else {
@@ -71,12 +71,12 @@ public class UdpManager {
     }
 
 
-    public void save(BencodeObject recv, int type) {
+    public static void save(BencodeObject recv, int type) {
         StringBuilder sb = new StringBuilder();
         byte[] bytes = recv.get("a").get("info_hash").castToBytes();
         for (byte a : bytes) {
             sb.append(String.format("%02X", a));
         }
-        BtLibrary.getInstence().addInfoHash(sb.toString(), type);
+        InfoHashStorage.getInstance().addInfoHash(sb.toString(), type);
     }
 }

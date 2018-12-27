@@ -1,6 +1,6 @@
 package com.github.fengleicn.dht.subsystem;
 
-import com.github.fengleicn.dht.starter.BtInfoFinder;
+import com.github.fengleicn.dht.starter.TaskManager;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class BtLibrary {
-    private volatile static BtLibrary instance;
+public class InfoHashStorage {
+    private volatile static InfoHashStorage instance;
     public static final int ANNOUNCE = 1;
     public static final int GET = 2;
     public static PrintWriter result;
@@ -25,18 +25,18 @@ public class BtLibrary {
         }
     }
 
-    class Torrent {
+    class TorrentInfo {
         String content;
         int weight;
     }
 
-    Map<String, Torrent> torrentMap = new ConcurrentHashMap<>();
+    Map<String, TorrentInfo> storage = new ConcurrentHashMap<>();
 
-    public static BtLibrary getInstence() {
+    public static InfoHashStorage getInstance() {
         if (instance == null) {
-            synchronized (BtLibrary.class) {
+            synchronized (InfoHashStorage.class) {
                 if (instance == null) {
-                    instance = new BtLibrary();
+                    instance = new InfoHashStorage();
                     new Thread(() -> {
                         instance.downloadMetadata();
                     }).start();
@@ -46,7 +46,7 @@ public class BtLibrary {
         return instance;
     }
 
-    private BtLibrary() {
+    private InfoHashStorage() {
     }
 
     public synchronized void addInfoHash(String infoHash, int type) {
@@ -61,14 +61,14 @@ public class BtLibrary {
             default:
                 throw new RuntimeException("type error");
         }
-        Torrent torrent = torrentMap.get(infoHash);
-        if (torrent == null) {
-            torrent = new Torrent();
-            torrent.weight = weight;
+        TorrentInfo torrentInfo = storage.get(infoHash);
+        if (torrentInfo == null) {
+            torrentInfo = new TorrentInfo();
+            torrentInfo.weight = weight;
         } else {
-            torrent.weight += weight;
+            torrentInfo.weight += weight;
         }
-        torrentMap.put(infoHash, torrent);
+        storage.put(infoHash, torrentInfo);
     }
 
     public void downloadMetadata() {
@@ -76,16 +76,16 @@ public class BtLibrary {
         while (true) {
             try {
                 Thread.sleep(500);
-                if (torrentMap.size() > 1000) {
+                if (storage.size() > 1000) {
                     synchronized (this) {
-                        torrentMap.clear();
+                        storage.clear();
                     }
                     continue;
                 }
-                if (torrentMap.entrySet().isEmpty()) {
+                if (storage.entrySet().isEmpty()) {
                     continue;
                 }
-                List<Map.Entry<String, Torrent>> l = new ArrayList<>(torrentMap.entrySet());
+                List<Map.Entry<String, TorrentInfo>> l = new ArrayList<>(storage.entrySet());
                 l.sort((o1, o2) -> {
                     if (o1.getValue().content != null && o2.getValue().content != null) {
                         return 0;
@@ -100,7 +100,7 @@ public class BtLibrary {
                 l.get(0).getValue().weight -= 100;
                 new Thread(() -> {
                     try {
-                        BtTracker.request(l.get(0).getKey());
+                        TrackerServer.request(l.get(0).getKey());
                     } catch (InterruptedException | IOException e) {
                         e.printStackTrace();
                     }
@@ -113,13 +113,13 @@ public class BtLibrary {
 
     public void recordMetaData(String infoHash, String data) {
         synchronized(this) {
-            if(infoHash.equalsIgnoreCase(BtInfoFinder.GET_PEER_INFO_HASH))
+            if(infoHash.equalsIgnoreCase(TaskManager.GET_PEER_INFO_HASH))
                 return;
-            Torrent torrent = torrentMap.get(infoHash);
-            if (!data.equals(torrent.content)) {
+            TorrentInfo torrentInfo = storage.get(infoHash);
+            if (!data.equals(torrentInfo.content)) {
                 result.write(new Date().toString() + " " + infoHash + "\t" + data + "\n");
                 result.flush();
-                torrent.content = data;
+                torrentInfo.content = data;
             }
         }
     }

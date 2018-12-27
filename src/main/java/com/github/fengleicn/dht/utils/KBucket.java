@@ -7,17 +7,17 @@ import java.util.*;
 
 public class KBucket {
     List<KBucketNode>[] buket;
-    KBucketNode localKBucketNode;
+    KBucketNode myKBucketNode;
     final static int K = 20;
 
 
     @SuppressWarnings("unchecked")
-    public KBucket(KBucketNode localKBucketNode) {
+    public KBucket(KBucketNode myKBucketNode) {
         buket = new List[160];
         for (int i = 0; i < 160; i++) {
             buket[i] = new Vector<>();
         }
-        this.localKBucketNode = localKBucketNode;
+        this.myKBucketNode = myKBucketNode;
     }
 
     void remove(List<KBucketNode> list) {
@@ -32,7 +32,7 @@ public class KBucket {
         return new BigInteger(buf);
     }
 
-    public KBucketNode getRandomNode() throws Exception {
+    public KBucketNode randomNode() throws Exception {
         Random r  = new Random();
         List<Integer> notEmptyList = new ArrayList<>();
         for (int i = 0; i < 160; i++){
@@ -44,17 +44,17 @@ public class KBucket {
             throw new Exception("notEmptyList is empty");
         int i = notEmptyList.get(r.nextInt(notEmptyList.size()));
         int size = buket[i].size();
-        if(Arrays.equals(buket[i].get(r.nextInt(size)).ip, localKBucketNode.ip)){
+        if(Arrays.equals(buket[i].get(r.nextInt(size)).ip, myKBucketNode.ip)){
             throw new Exception("a loop udp");
         }
         return buket[i].get(r.nextInt(size));
     }
 
     public synchronized void add(KBucketNode KBucketNode) {
-        BigInteger bigInteger = xor(KBucketNode, localKBucketNode);
+        BigInteger bigInteger = xor(KBucketNode, myKBucketNode);
         for (int i = 1; i <= 160; i++) {
             if (bigInteger.compareTo(BigInteger.valueOf(2).pow(i)) < 0) {
-                if(Arrays.equals(KBucketNode.ip, localKBucketNode.ip)){
+                if(Arrays.equals(KBucketNode.ip, myKBucketNode.ip)){
                     return;
                 }
                 if (buket[i - 1].size() >= K) {
@@ -74,7 +74,7 @@ public class KBucket {
     }
 
     public List<KBucketNode> get(KBucketNode KBucketNode){
-        BigInteger bigInteger = xor(KBucketNode, localKBucketNode);
+        BigInteger bigInteger = xor(KBucketNode, myKBucketNode);
         for (int i = 1; i <= 160; i++) {
             if (bigInteger.compareTo(BigInteger.valueOf(2).pow(i)) < 0) {
                 return buket[i - 1];

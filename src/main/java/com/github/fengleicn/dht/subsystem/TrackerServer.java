@@ -1,7 +1,7 @@
 package com.github.fengleicn.dht.subsystem;
 
 import com.github.fengleicn.dht.node.KBucketNode;
-import com.github.fengleicn.dht.starter.BtInfoFinder;
+import com.github.fengleicn.dht.starter.TaskManager;
 import com.github.fengleicn.dht.utils.Utils;
 import org.assertj.core.util.Lists;
 
@@ -11,7 +11,7 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-public class BtTracker {
+public class TrackerServer {
     static final int SEC = 1000;
     static final int TCP_TIMEOUT = 20 * SEC;
     static final int UDP_TIMEOUT = 5 * SEC;
@@ -39,16 +39,16 @@ public class BtTracker {
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
-        new BtTracker().request("EEB7C79987A49F3CA816A951C404350A83C23C3C");
+        new TrackerServer().request("EEB7C79987A49F3CA816A951C404350A83C23C3C");
 
     }
 
     public static void request(String infoHash) throws InterruptedException, IOException {
-        KBucketNode localKBucketNode = BtInfoFinder.localKBucketNode;
-        if (localKBucketNode != null)
-            blackListSet.add(localKBucketNode.getIp() + ":" + localKBucketNode.getPort());
+        KBucketNode myKBucketNode = TaskManager.myKBucketNode;
+        if (myKBucketNode != null)
+            blackListSet.add(myKBucketNode.getIp() + ":" + myKBucketNode.getPort());
 
-        String[] addresses = {
+        String[] trackerAddresses = {
                 "tracker.opentrackr.org:1337",
                 "tracker.internetwarriors.net:1337",
                 "tracker.internetwarriors.net:1337",
@@ -116,7 +116,7 @@ public class BtTracker {
         };
 
         Set<String> addrSet = new HashSet<>();
-        for (String address : addresses) {
+        for (String address : trackerAddresses) {
             if (random.nextBoolean() && random.nextBoolean()) {
                 continue;
             }
@@ -128,7 +128,7 @@ public class BtTracker {
                     request(host, port, infoHash, addrSet);
                 } catch (IOException e) {
                     try {
-                        trackerLogger.write("tracker " + host + ":" + port + " Error" + "\n");
+                        trackerLogger.write("[ERROR]  tracker " + host + ":" + port + "\n");
                     } catch (IOException e1) {
                         e1.printStackTrace();
                     }
@@ -137,7 +137,7 @@ public class BtTracker {
             }).start();
         }
         Thread.sleep(4000); //等上面的线程结束
-        trackerLogger.write("Downloading " + infoHash + ": \n" + "list： " + addrSet.toString() + "\n");
+        trackerLogger.write("[INFO]  Downloading: " + infoHash + ": \n" + "        IP: " + addrSet.toString() + "\n");
         trackerLogger.flush();
         Set<String> saveSet = addrSet;
         int MAX = 500;

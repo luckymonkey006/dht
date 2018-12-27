@@ -20,7 +20,7 @@ public
  */
 
 
-class UdpNetworkContoller {
+class UdpContoller {
     public static FileWriter log;
 
     static {
@@ -33,7 +33,7 @@ class UdpNetworkContoller {
 
     DatagramSocket datagramSocket;
 
-    public UdpNetworkContoller(DatagramSocket datagramSocket) {
+    public UdpContoller(DatagramSocket datagramSocket) {
         this.datagramSocket = datagramSocket;
     }
 

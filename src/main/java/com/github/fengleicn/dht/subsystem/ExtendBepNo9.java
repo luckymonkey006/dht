@@ -113,7 +113,7 @@ public class ExtendBepNo9 {
                         inputStream.read(name);
 
                         socket.close();
-                        BtLibrary.getInstence().recordMetaData(infoHash, new String(name, "utf8"));
+                        InfoHashStorage.getInstance().recordMetaData(infoHash, new String(name, "utf8"));
                         break end;
                     } else {
                         break end;
