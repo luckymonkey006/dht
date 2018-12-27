@@ -42,11 +42,11 @@ public class UdpUtils {
                         for (byte a : bytes) {
                             sb.append(String.format("%02X", a));
                         }
-                        save(b, InfoHashStorage.GET);
+                        save(b, InfoHashStorage.WEIGHT_GET);
                         break;
                     case "announce_peer":
                         transId = b.get("t").castToBytes();
-                        save(b, InfoHashStorage.ANNOUNCE);
+                        save(b, InfoHashStorage.WEIGHT_ANNOUNCE);
                         return Utils.rspAnnouncePeer(transId, localNodeId, remoteSocketAddress); //TODO check token
                 }
             } else {
@@ -71,12 +71,12 @@ public class UdpUtils {
     }
 
 
-    public static void save(BencodeObject recv, int type) {
+    public static void save(BencodeObject recv, int weight) {
         StringBuilder sb = new StringBuilder();
         byte[] bytes = recv.get("a").get("info_hash").castToBytes();
         for (byte a : bytes) {
             sb.append(String.format("%02X", a));
         }
-        InfoHashStorage.getInstance().addInfoHash(sb.toString(), type);
+        InfoHashStorage.getInstance().addInfoHash(sb.toString(), weight);
     }
 }

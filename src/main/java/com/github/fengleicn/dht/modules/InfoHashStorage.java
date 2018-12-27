@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InfoHashStorage {
     private volatile static InfoHashStorage instance;
-    public static final int ANNOUNCE = 1;
-    public static final int GET = 2;
+    public static final int WEIGHT_ANNOUNCE = 50;
+    public static final int WEIGHT_GET = 1;
     public static PrintWriter result;
 
     static {
@@ -26,20 +26,18 @@ public class InfoHashStorage {
     }
 
     class TorrentInfo {
-        String content;
+        String fileName;
         int weight;
     }
 
-    Map<String, TorrentInfo> storage = new ConcurrentHashMap<>();
+    private Map<String, TorrentInfo> storage = new ConcurrentHashMap<>();
 
     public static InfoHashStorage getInstance() {
         if (instance == null) {
             synchronized (InfoHashStorage.class) {
                 if (instance == null) {
                     instance = new InfoHashStorage();
-                    new Thread(() -> {
-                        instance.downloadMetadata();
-                    }).start();
+                    new Thread(() -> instance.downloadMetadata()).start();
                 }
             }
         }
@@ -49,18 +47,7 @@ public class InfoHashStorage {
     private InfoHashStorage() {
     }
 
-    public synchronized void addInfoHash(String infoHash, int type) {
-        int weight;
-        switch (type) {
-            case ANNOUNCE:
-                weight = 50;
-                break;
-            case GET:
-                weight = 1;
-                break;
-            default:
-                throw new RuntimeException("type error");
-        }
+    public synchronized void addInfoHash(String infoHash, int weight) {
         TorrentInfo torrentInfo = storage.get(infoHash);
         if (torrentInfo == null) {
             torrentInfo = new TorrentInfo();
@@ -72,8 +59,7 @@ public class InfoHashStorage {
     }
 
     public void downloadMetadata() {
-
-        while (true) {
+        for (;;) {
             try {
                 Thread.sleep(500);
                 if (storage.size() > 1000) {
@@ -87,11 +73,11 @@ public class InfoHashStorage {
                 }
                 List<Map.Entry<String, TorrentInfo>> l = new ArrayList<>(storage.entrySet());
                 l.sort((o1, o2) -> {
-                    if (o1.getValue().content != null && o2.getValue().content != null) {
+                    if (o1.getValue().fileName != null && o2.getValue().fileName != null) {
                         return 0;
-                    } else if (o1.getValue().content != null) {
+                    } else if (o1.getValue().fileName != null) {
                         return 1;
-                    } else if (o2.getValue().content != null) {
+                    } else if (o2.getValue().fileName != null) {
                         return -1;
                     } else {
                         return o2.getValue().weight - o1.getValue().weight;
@@ -111,15 +97,15 @@ public class InfoHashStorage {
         }
     }
 
-    public void recordMetaData(String infoHash, String data) {
+    public void recordMetaData(String infoHash, String fileName) {
         synchronized(this) {
             if(infoHash.equalsIgnoreCase(TaskManager.GET_PEER_INFO_HASH))
                 return;
             TorrentInfo torrentInfo = storage.get(infoHash);
-            if (!data.equals(torrentInfo.content)) {
-                result.write(new Date().toString() + " " + infoHash + "\t" + data + "\n");
+            if (!fileName.equals(torrentInfo.fileName)) {
+                torrentInfo.fileName = fileName;
+                result.println(new Date().toString() + " " + infoHash + "    " + fileName);
                 result.flush();
-                torrentInfo.content = data;
             }
         }
     }
