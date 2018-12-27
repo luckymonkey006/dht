@@ -1,6 +1,4 @@
-package com.github.fengleicn.dht.node;
-
-import org.junit.Test;
+package com.github.fengleicn.dht.utils.structs;
 
 import java.util.Arrays;
 

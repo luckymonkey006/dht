@@ -1,10 +1,10 @@
-package com.github.fengleicn.dht.starter;
+package com.github.fengleicn.dht.main;
 
-import com.github.fengleicn.dht.node.KBucketNode;
-import com.github.fengleicn.dht.packet.UdpPacket;
-import com.github.fengleicn.dht.subsystem.UdpUtils;
-import com.github.fengleicn.dht.subsystem.UdpContoller;
-import com.github.fengleicn.dht.utils.KBucket;
+import com.github.fengleicn.dht.utils.structs.KBucketNode;
+import com.github.fengleicn.dht.utils.structs.UdpPacket;
+import com.github.fengleicn.dht.utils.UdpUtils;
+import com.github.fengleicn.dht.modules.UdpContoller;
+import com.github.fengleicn.dht.utils.structs.KBucket;
 import com.github.fengleicn.dht.utils.Utils;
 
 import java.net.*;

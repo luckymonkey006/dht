@@ -1,4 +1,4 @@
-package com.github.fengleicn.dht.bencode;
+package com.github.fengleicn.dht.utils.structs.bencode;
 
 import java.util.HashMap;
 

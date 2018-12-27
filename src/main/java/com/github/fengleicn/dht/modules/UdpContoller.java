@@ -1,8 +1,8 @@
-package com.github.fengleicn.dht.subsystem;
+package com.github.fengleicn.dht.modules;
 
-import com.github.fengleicn.dht.bencode.BencodeObject;
-import com.github.fengleicn.dht.bencode.BencodeUtil;
-import com.github.fengleicn.dht.packet.UdpPacket;
+import com.github.fengleicn.dht.utils.structs.bencode.BencodeObject;
+import com.github.fengleicn.dht.utils.structs.bencode.utils.BencodeUtil;
+import com.github.fengleicn.dht.utils.structs.UdpPacket;
 
 import java.io.FileWriter;
 import java.io.IOException;

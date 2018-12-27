@@ -1,10 +1,10 @@
-package com.github.fengleicn.dht.subsystem;
+package com.github.fengleicn.dht.utils;
 
-import com.github.fengleicn.dht.bencode.BencodeObject;
-import com.github.fengleicn.dht.node.KBucketNode;
-import com.github.fengleicn.dht.packet.UdpPacket;
-import com.github.fengleicn.dht.utils.KBucket;
-import com.github.fengleicn.dht.utils.Utils;
+import com.github.fengleicn.dht.utils.structs.bencode.BencodeObject;
+import com.github.fengleicn.dht.modules.InfoHashStorage;
+import com.github.fengleicn.dht.utils.structs.KBucket;
+import com.github.fengleicn.dht.utils.structs.KBucketNode;
+import com.github.fengleicn.dht.utils.structs.UdpPacket;
 
 import java.net.InetSocketAddress;
 import java.util.List;

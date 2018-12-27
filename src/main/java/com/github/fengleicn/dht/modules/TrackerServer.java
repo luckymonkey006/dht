@@ -1,7 +1,7 @@
-package com.github.fengleicn.dht.subsystem;
+package com.github.fengleicn.dht.modules;
 
-import com.github.fengleicn.dht.node.KBucketNode;
-import com.github.fengleicn.dht.starter.TaskManager;
+import com.github.fengleicn.dht.utils.structs.KBucketNode;
+import com.github.fengleicn.dht.main.TaskManager;
 import com.github.fengleicn.dht.utils.Utils;
 import org.assertj.core.util.Lists;
 

@@ -1,6 +1,4 @@
-package com.github.fengleicn.dht.utils;
-
-import com.github.fengleicn.dht.node.KBucketNode;
+package com.github.fengleicn.dht.utils.structs;
 
 import java.math.BigInteger;
 import java.util.*;

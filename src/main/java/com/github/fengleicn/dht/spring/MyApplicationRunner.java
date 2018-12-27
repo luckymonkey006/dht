@@ -1,5 +1,6 @@
-package com.github.fengleicn.dht.starter;
+package com.github.fengleicn.dht.spring;
 
+import com.github.fengleicn.dht.main.TaskManager;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;

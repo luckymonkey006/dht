@@ -1,19 +1,18 @@
 package com.github.fengleicn.dht.utils;
 
-import com.github.fengleicn.dht.bencode.BencodeObject;
-import com.github.fengleicn.dht.bencode.BencodeHashMap;
-import com.github.fengleicn.dht.node.KBucketNode;
-import com.github.fengleicn.dht.packet.UdpPacket;
+import com.github.fengleicn.dht.utils.structs.bencode.BencodeObject;
+import com.github.fengleicn.dht.utils.structs.bencode.BencodeHashMap;
+import com.github.fengleicn.dht.utils.structs.KBucketNode;
+import com.github.fengleicn.dht.utils.structs.UdpPacket;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
-import static com.github.fengleicn.dht.bencode.BencodeObject.UNICODE_UTF8;
+import static com.github.fengleicn.dht.utils.structs.bencode.BencodeObject.UNICODE_UTF8;
 
 public class Utils {
 

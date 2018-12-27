@@ -1,6 +1,6 @@
-package com.github.fengleicn.dht.packet;
+package com.github.fengleicn.dht.utils.structs;
 
-import com.github.fengleicn.dht.bencode.BencodeObject;
+import com.github.fengleicn.dht.utils.structs.bencode.BencodeObject;
 
 import java.net.InetSocketAddress;
 

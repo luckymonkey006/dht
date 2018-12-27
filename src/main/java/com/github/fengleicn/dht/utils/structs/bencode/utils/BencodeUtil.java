@@ -1,10 +1,12 @@
-package com.github.fengleicn.dht.bencode;
+package com.github.fengleicn.dht.utils.structs.bencode.utils;
+
+import com.github.fengleicn.dht.utils.structs.bencode.BencodeObject;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.util.*;
 
-import static com.github.fengleicn.dht.bencode.BencodeObject.UNICODE_UTF8;
+import static com.github.fengleicn.dht.utils.structs.bencode.BencodeObject.UNICODE_UTF8;
 import static com.github.fengleicn.dht.utils.Utils.*;
 
 public class BencodeUtil {

@@ -1,4 +1,4 @@
-package com.github.fengleicn.dht.bencode;
+package com.github.fengleicn.dht.utils.structs.bencode;
 
 import com.github.fengleicn.dht.utils.Utils;
 
@@ -95,7 +95,7 @@ public class BencodeObject {
         MAP, LIST, BYTES, BIG_INTEGER, ERROR
     }
 
-    BencodeObjType type() {
+    public BencodeObjType type() {
         if (data instanceof Map) {
             return BencodeObjType.MAP;
         } else if (data instanceof List) {

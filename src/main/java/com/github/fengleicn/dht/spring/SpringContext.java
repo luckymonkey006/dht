@@ -1,4 +1,4 @@
-package com.github.fengleicn.dht.context;
+package com.github.fengleicn.dht.spring;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
