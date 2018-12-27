@@ -179,13 +179,14 @@ public class BtTracker {
         buf = ByteBuffer.allocate(16).putLong(0x41727101980L).putInt(0).putInt(TRANS_ID).array();
 
         SocketAddress socketAddress;
+        DatagramPacket packet;
         try{
             socketAddress  = new InetSocketAddress(host, port);
+            packet = new DatagramPacket(buf, buf.length, socketAddress);
         }catch (Exception e){
             System.err.println(host + "  " + port);
             return;
         }
-        DatagramPacket packet = new DatagramPacket(buf, buf.length, socketAddress);
         datagramSocket.send(packet);
 
         try {
