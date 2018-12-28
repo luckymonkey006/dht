@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -16,13 +17,13 @@ public class TrackerServer {
     static final int TCP_TIMEOUT = 20 * SEC;
     static final int UDP_TIMEOUT = 5 * SEC;
 
-    public static FileWriter trackerLogger;
+    public static PrintWriter trackerLog;
     private static final Random random = new Random();
 
 
     static {
         try {
-            trackerLogger = new FileWriter("tracker.txt", true);
+            trackerLog = new PrintWriter(new FileWriter("tracker.txt", true), true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -30,12 +31,12 @@ public class TrackerServer {
 
     public static byte[] zeroByte36 = new byte[36];
     public static byte[] zeroByte4 = new byte[4];
-    public static Set<String> blackListSet = Collections.synchronizedSet(new HashSet<>());
+    public static Set<String> peerBlackList = Collections.synchronizedSet(new HashSet<>());
     public static int TRANS_ID = 0xCAFEBABE;
 
     static {
-        blackListSet.add("0.0.0.0:0");
-        blackListSet.add("0.0.0.0:65535");
+        peerBlackList.add("0.0.0.0:0");
+        peerBlackList.add("0.0.0.0:65535");
     }
 
     @Test
@@ -46,7 +47,7 @@ public class TrackerServer {
     public static void request(String infoHash) throws InterruptedException, IOException {
         KBucketNode myKBucketNode = StartUp.myKBucketNode;
         if (myKBucketNode != null)
-            blackListSet.add(myKBucketNode.getIp() + ":" + myKBucketNode.getPort());
+            peerBlackList.add(myKBucketNode.getIp() + ":" + myKBucketNode.getPort());
 
         String[] trackerAddresses = {
                 "tracker.opentrackr.org:1337",
@@ -115,63 +116,55 @@ public class TrackerServer {
                 "agusiq-torrents.pl:6969"
         };
 
-        Set<String> addrSet = new HashSet<>();
-        for (String address : trackerAddresses) {
-            if (random.nextBoolean() && random.nextBoolean()) {
-                continue;
-            }
-            String[] addrSplit = address.split(":");
-            String host = addrSplit[0];
-            int port = Integer.valueOf(addrSplit[1]);
+        Set<String> peers = new HashSet<>();
+        for (String tracker : trackerAddresses) {
+            String[] trackerSplit = tracker.split(":");
+            String trackerHost = trackerSplit[0];
+            int trackerPort = Integer.valueOf(trackerSplit[1]);
             new Thread(() -> {
                 try {
-                    request(host, port, infoHash, addrSet);
+                    request(trackerHost, trackerPort, infoHash, peers);
                 } catch (IOException e) {
-                    try {
-                        trackerLogger.write("[ERROR]  tracker " + host + ":" + port + "\n");
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
+                    trackerLog.println("[ERROR] In tracker: " + trackerHost + ":" + trackerPort);
                     e.printStackTrace();
                 }
             }).start();
         }
         Thread.sleep(4000); //等上面的线程结束
-        trackerLogger.write("[INFO]  Downloading: " + infoHash + ": \n" + "        IP: " + addrSet.toString() + "\n");
-        trackerLogger.flush();
-        Set<String> saveSet = addrSet;
-        int MAX = 500;
-        if(addrSet.size() > MAX){
-            List<String> objList = Lists.newArrayList(addrSet);
-            saveSet = new HashSet<>(objList.subList(0, MAX));
+        trackerLog.println("[INFO]  Downloading: " + infoHash + ": \n" + "        IP: " + peers.toString() + "\n");
+        Set<String> peersCopy = new HashSet<>(peers);
+        final int MAX = 500;
+        if (peers.size() > MAX) {
+            List<String> copy = Lists.newArrayList(peers);
+            peersCopy = new HashSet<>(copy.subList(0, MAX));
         }
-        for (String addr : saveSet) {
+        for (String peer : peersCopy) {
             Thread.sleep(1);
             new Thread(() -> {
                 ExtendBepNo9 extendBepNo9 = new ExtendBepNo9();
                 Socket socket = null;
                 try {
-                    String[] remtAddr = addr.split(":");
-                    socket = new Socket(remtAddr[0], Integer.valueOf(remtAddr[1]));
+                    String[] peerSplit = peer.split(":");
+                    socket = new Socket(peerSplit[0], Integer.valueOf(peerSplit[1]));
                     socket.setSoTimeout(TCP_TIMEOUT);
-                    String isOk = extendBepNo9.request(socket, infoHash);
-                    if (isOk == null) {
-                        blackListSet.add(remtAddr[0] + ":" + remtAddr[1]);
+                    Boolean success = extendBepNo9.request(socket, infoHash);
+                    if (!Boolean.TRUE.equals(success)) {
+                        peerBlackList.add(peerSplit[0] + ":" + peerSplit[1]);
                     }
                     socket.close();
-                } catch (Exception ignored) {
+                } catch (Exception e) {
                     try {
                         if (socket != null) {
                             socket.close();
                         }
-                    } catch (IOException e) {
+                    } catch (IOException ignored) {
                     }
                 }
             }).start();
         }
     }
 
-    public static void request(String host, int port, String infoHash, Set<String> addrList) throws IOException {
+    public static void request(String host, int port, String infoHash, Set<String> peers) throws IOException {
         DatagramSocket datagramSocket = new DatagramSocket(new InetSocketAddress("0.0.0.0", 0));
         datagramSocket.setSoTimeout(UDP_TIMEOUT);
 
@@ -187,10 +180,10 @@ public class TrackerServer {
 
         SocketAddress socketAddress;
         DatagramPacket packet;
-        try{
-            socketAddress  = new InetSocketAddress(host, port);
+        try {
+            socketAddress = new InetSocketAddress(host, port);
             packet = new DatagramPacket(buf, buf.length, socketAddress);
-        }catch (Exception e){
+        } catch (Exception e) {
             System.err.println(host + "  " + port);
             return;
         }
@@ -252,11 +245,11 @@ public class TrackerServer {
         datagramSocket.close();
         for (int i = 20; i + 6 <= packetLength; i += 6) {
             byte[] remoteAddress = Arrays.copyOfRange(buf, i, i + 6);
-            if (blackListSet.contains(Utils.getHostIpFromBytes(remoteAddress) + ":" + Utils.getIntFromBytes(remoteAddress)))
+            if (peerBlackList.contains(Utils.getHostIpFromBytes(remoteAddress) + ":" + Utils.getIntFromBytes(remoteAddress)))
                 continue;
             String peerIp = Utils.getHostIpFromBytes(remoteAddress);
             int peerPort = Integer.parseInt(Utils.getIntFromBytes(remoteAddress));
-            addrList.add(peerIp + ":" + peerPort);
+            peers.add(peerIp + ":" + peerPort);
         }
     }
 }

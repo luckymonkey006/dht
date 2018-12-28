@@ -13,7 +13,7 @@ public class ExtendBepNo9 {
 
 
 
-    public String request(Socket socket, String infoHash) throws Exception {
+    public Boolean request(Socket socket, String infoHash) throws Exception {
         InputStream inputStream = socket.getInputStream();
         OutputStream outputStream = socket.getOutputStream();
 
@@ -128,6 +128,6 @@ public class ExtendBepNo9 {
             }
         }
         socket.close();
-        return "OK";
+        return true;
     }
 }
