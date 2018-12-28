@@ -7,12 +7,12 @@ public class KBucket {
     List<KBucketNode>[] buket;
     KBucketNode myKBucketNode;
     final static int K = 20;
-
+    final static int KB_SIZE = 160;
 
     @SuppressWarnings("unchecked")
     public KBucket(KBucketNode myKBucketNode) {
-        buket = new List[160];
-        for (int i = 0; i < 160; i++) {
+        buket = new List[KB_SIZE];
+        for (int i = 0; i < KB_SIZE; i++) {
             buket[i] = new Vector<>();
         }
         this.myKBucketNode = myKBucketNode;
@@ -33,7 +33,7 @@ public class KBucket {
     public KBucketNode randomNode() throws Exception {
         Random r  = new Random();
         List<Integer> notEmptyList = new ArrayList<>();
-        for (int i = 0; i < 160; i++){
+        for (int i = 0; i < KB_SIZE; i++){
             if(buket[i].size() != 0){
                 notEmptyList.add(i);
             }
@@ -50,7 +50,7 @@ public class KBucket {
 
     public synchronized void add(KBucketNode KBucketNode) {
         BigInteger bigInteger = xor(KBucketNode, myKBucketNode);
-        for (int i = 1; i <= 160; i++) {
+        for (int i = 1; i <= KB_SIZE; i++) {
             if (bigInteger.compareTo(BigInteger.valueOf(2).pow(i)) < 0) {
                 if(Arrays.equals(KBucketNode.ip, myKBucketNode.ip)){
                     return;
@@ -73,7 +73,7 @@ public class KBucket {
 
     public List<KBucketNode> get(KBucketNode KBucketNode){
         BigInteger bigInteger = xor(KBucketNode, myKBucketNode);
-        for (int i = 1; i <= 160; i++) {
+        for (int i = 1; i <= KB_SIZE; i++) {
             if (bigInteger.compareTo(BigInteger.valueOf(2).pow(i)) < 0) {
                 return buket[i - 1];
             }

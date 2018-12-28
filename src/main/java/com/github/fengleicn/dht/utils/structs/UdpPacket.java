@@ -1,6 +1,7 @@
 package com.github.fengleicn.dht.utils.structs;
 
 import com.github.fengleicn.dht.utils.structs.bencode.BencodeObject;
+import org.junit.Test;
 
 import java.net.InetSocketAddress;
 
