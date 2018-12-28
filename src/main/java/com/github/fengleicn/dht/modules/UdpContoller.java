@@ -41,7 +41,7 @@ class UdpContoller {
         BencodeObject bencodeObject = udpPacket.bencodeObject;
         byte[] sendBytes = BencodeUtil.toBencodeString(bencodeObject);
         datagramSocket.send(new DatagramPacket(sendBytes, sendBytes.length, udpPacket.address));
-        addLog("SEND", sendBytes, udpPacket.address.getHostName(), udpPacket.address.getPort() + "");
+        addLog("SEND", sendBytes, udpPacket.address.getAddress().getHostAddress(), udpPacket.address.getPort() + "");
     }
 
     public UdpPacket recv() throws Exception {
