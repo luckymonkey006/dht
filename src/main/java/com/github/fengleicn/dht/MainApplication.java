@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.Arrays;
+import java.util.List;
+
 @SpringBootApplication
 public class MainApplication {
     public static void main(String[] args) throws Exception {
@@ -27,4 +30,5 @@ public class MainApplication {
         LoggerFactory.getLogger(MainApplication.class).info("localhost: " +  MyApplicationRunner.myIp + ":" +  MyApplicationRunner.myPort);
         SpringApplication.run(MainApplication.class);
     }
+
 }
