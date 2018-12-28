@@ -14,13 +14,19 @@
   <img src="https://img.shields.io/badge/JDK-9-green.svg" />
   <img src="https://img.shields.io/badge/MAVEN-Project-green.svg" />
   <img src="https://img.shields.io/badge/IP-Public-green.svg" />
+  <img src="https://img.shields.io/badge/Port-6883-green.svg" />
 </p>
+- 说明
+  请保证对外网开放 udp/6883 端口, 不支持内网运行。
+- Watch Out
+  please open your udp/6883 port to public network.
 
-- 运行方法 (How to run)
+- 运行方法
+- How to run
 
-![运行方法](show.gif)
+![](show.gif)
 
-- 种子信息将储存在项目文件夹下的 reslut/result.txt &nbsp; 
-- (Metainfo will be in ${ProjectDir}/reslut/result.txt)
+- 种子信息将储存在项目文件夹下的 reslut/result.txt 中 &nbsp; 
+- Metainfo will be in ${ProjectDir}/reslut/result.txt
 
-![结果](result.png)
+![](result.png)
