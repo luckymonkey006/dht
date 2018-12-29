@@ -1,8 +1,7 @@
 package com.github.fengleicn.dht.modules;
 
-import com.github.fengleicn.dht.utils.structs.KBucketNode;
 import com.github.fengleicn.dht.utils.Utils;
-import org.assertj.core.util.Lists;
+import com.github.fengleicn.dht.utils.structs.KBucketNode;
 import org.junit.Test;
 
 import java.io.FileWriter;
@@ -135,7 +134,7 @@ public class TrackerServer {
         Set<String> peersCopy = new HashSet<>(peers);
         final int MAX = 500;
         if (peers.size() > MAX) {
-            List<String> copy = Lists.newArrayList(peers);
+            List<String> copy = new ArrayList<>(peers);
             peersCopy = new HashSet<>(copy.subList(0, MAX));
         }
         for (String peer : peersCopy) {
