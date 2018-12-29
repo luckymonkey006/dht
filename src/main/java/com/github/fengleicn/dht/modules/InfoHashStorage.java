@@ -17,7 +17,7 @@ public class InfoHashStorage {
 
     static {
         try {
-            result = new PrintWriter(new FileWriter("result.txt", true));
+            result = new PrintWriter(new FileWriter("metainfo.txt", true));
         } catch (IOException e) {
             e.printStackTrace();
         }

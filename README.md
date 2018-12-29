@@ -17,11 +17,9 @@
   <img src="https://img.shields.io/badge/Port-6883-green.svg" />
 </p>
 
-- 说明
-  请保证对外网开放 udp/6883 端口， 不支持内网运行。
+- 注意！请保证对外网开放 udp/6883 端口， 不支持内网运行。
 
-- Watch Out  
-  please open your udp/6883 port to public network.
+- Watch Out! please open your udp/6883 port to the public network.
 
 - 运行方法
 
@@ -32,5 +30,3 @@
 - 种子信息将储存在项目文件夹下的 metainfo.txt 中 
 
 - metainfo.txt
-
-![](pic/meta_info.png)
