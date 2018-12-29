@@ -48,7 +48,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <!--<version>2.5.5</version>-->
                 <configuration>
                     <archive>
                         <manifest>
@@ -61,6 +60,6 @@
                 </configuration>
             </plugin>
         </plugins>
-        <finalName>torrentFinder</finalName>
+        <finalName>fengleicn_dht</finalName>
     </build>
 </project>
