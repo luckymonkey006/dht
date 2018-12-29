@@ -11,6 +11,7 @@ import org.apache.http.util.EntityUtils;
 
 public class MainApplication {
     public static void main(String[] args) throws Exception {
+        System.out.println("[INFO] running...");
         String myIp;
         String myPort;
         CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
