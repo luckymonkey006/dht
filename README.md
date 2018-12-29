@@ -11,7 +11,7 @@
 - 依赖 (Depend on)
 
 <p align=left>
-  <img src="https://img.shields.io/badge/JDK-9-green.svg" />
+  <img src="https://img.shields.io/badge/JDK-8-green.svg" />
   <img src="https://img.shields.io/badge/MAVEN-Project-green.svg" />
   <img src="https://img.shields.io/badge/IP-Public-green.svg" />
   <img src="https://img.shields.io/badge/Port-6883-green.svg" />
