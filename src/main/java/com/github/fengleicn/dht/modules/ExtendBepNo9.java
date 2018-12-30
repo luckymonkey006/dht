@@ -59,8 +59,6 @@ public class ExtendBepNo9 {
             return null;
         }
 
-        byte[] remoteHsPayload = Arrays.copyOfRange(remoteHsContent, 2, remoteHsContent.length);
-
         String req = "d8:msg_typei0e5:piecei0ee";
         int requestLen = 2 + req.length() + 4;
         byte[] requestMD = ByteBuffer.allocate(requestLen).putInt(2 + req.length()).put((byte) 20).put((byte) 2).put(req.getBytes("ASCII")).array();
@@ -68,16 +66,6 @@ public class ExtendBepNo9 {
         outputStream.write(requestMD);
         outputStream.flush();
 
-//        byte[] recv_4 = new byte[4];
-//        inputStream.read(recv_4);
-
-//        remoteHsContentLenInt = ByteBuffer.allocate(4).put(recv_4).getInt(0);
-//        if (remoteHsContentLenInt > 100000) {
-//            return null;
-//        }
-//
-//        byte[] bitMap = new byte[remoteHsContentLenInt];
-//        inputStream.read(bitMap);
 
         Thread.sleep(3000);
 
