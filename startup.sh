@@ -29,7 +29,7 @@ fi
 
 nohup java -Xmx512m -Xms512m -jar target/${filename}.jar ${id} &>err.log &
 
-nohup while true
+while true
 do
   sleep 5
   check_process ${id}
