@@ -12,10 +12,11 @@ fi
 
 nohup java -Xmx512m -Xms512m -jar target/${filename}.jar ${id} &>err.log &
 
-while(1){
+while(true)
+do
   sleep 5
   pid=$( ps -ef | grep ${jar_name} | grep ${id} | awk '{print $2}' )
   if [ -z "$pid" ]; then
         nohup java -Xmx512m -Xms512m -jar target/${filename}.jar ${id} &>err.log &
   fi
-}
+done
