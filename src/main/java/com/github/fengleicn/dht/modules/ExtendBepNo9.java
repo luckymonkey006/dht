@@ -36,9 +36,9 @@ public class ExtendBepNo9 {
         }
 
         String extHandShakePayload = "d1:md11:ut_metadatai1eee";
-        int len = extHandShakePayload.length();
-        int extHandShakeLen = 2 + len + 4;
-        byte[] extHandShake = ByteBuffer.allocate(extHandShakeLen).putInt(2 + len).put((byte) 20).put((byte) 0).put(extHandShakePayload.getBytes(StandardCharsets.US_ASCII)).array();
+        int extHandShakeLength = 2 + extHandShakePayload.length() + 4;
+        byte[] extHandShake = ByteBuffer.allocate(extHandShakeLength).putInt(2 + extHandShakePayload.length())
+                .put((byte) 20).put((byte) 0).put(extHandShakePayload.getBytes(StandardCharsets.UTF_8)).array();
 
         outputStream.write(extHandShake);
         outputStream.flush();
@@ -59,26 +59,13 @@ public class ExtendBepNo9 {
             return null;
         }
 
-        byte[] remoteHsPayload = Arrays.copyOfRange(remoteHsContent, 2, remoteHsContent.length);
-
         String req = "d8:msg_typei0e5:piecei0ee";
-        len = req.length();
-        int requestLen = 2 + len + 4;
-        byte[] requestMD = ByteBuffer.allocate(requestLen).putInt(2 + len).put((byte) 20).put((byte) 2).put(req.getBytes("ASCII")).array();
+        int requestLen = 2 + req.length() + 4;
+        byte[] requestMD = ByteBuffer.allocate(requestLen).putInt(2 + req.length()).put((byte) 20).put((byte) 2).put(req.getBytes("ASCII")).array();
 
         outputStream.write(requestMD);
         outputStream.flush();
 
-//        byte[] recv_4 = new byte[4];
-//        inputStream.read(recv_4);
-
-//        remoteHsContentLenInt = ByteBuffer.allocate(4).put(recv_4).getInt(0);
-//        if (remoteHsContentLenInt > 100000) {
-//            return null;
-//        }
-//
-//        byte[] bitMap = new byte[remoteHsContentLenInt];
-//        inputStream.read(bitMap);
 
         Thread.sleep(3000);
 
