@@ -29,11 +29,11 @@ fi
 
 nohup java -Xmx512m -Xms512m -jar target/${filename}.jar ${id} &>err.log &
 
-while true
-do
-  sleep 5
-  check_process ${id}
-  if [ $? -eq 0 ]; then
-        nohup java -Xmx512m -Xms512m -jar target/${filename}.jar ${id} &>err.log &
-  fi
-done &>/dev/null &
+#while true
+#do
+#  sleep 5
+#  check_process ${id}
+#  if [ $? -eq 0 ]; then
+#        nohup java -Xmx512m -Xms512m -jar target/${filename}.jar ${id} &>err.log &
+#  fi
+#done &>/dev/null &
