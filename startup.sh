@@ -9,4 +9,4 @@ if [ -n "$pid" ]; then
     kill -9 ${pid}
 fi
 
-nohup java -Xmx512m -Xms512m -jar target/${filename}.jar &>err.log &
+nohup sudo java -Xmx512m -Xms512m -jar target/${filename}.jar &>err.log &
