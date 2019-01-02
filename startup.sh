@@ -4,6 +4,10 @@ cmd="nohup java -Xmx512m -Xms512m -jar target/${jar_name}.jar 1>err.log 2>&1 &"
 
 git pull
 mvn package
+pid=$( ps -ef | grep startup | grep sh | awk '{print $2}' )
+if [ -n "$pid" ]; then
+    kill -9 ${pid}
+fi
 pid=$( ps -ef | grep ${jar_name} | grep java | awk '{print $2}' )
 if [ -n "$pid" ]; then
     kill -9 ${pid}
