@@ -9,7 +9,7 @@ pid=$( ps -ef | grep ${jar_name} | grep java | awk '{print $2}' )
 if [ -n "$pid" ]; then
     kill -9 ${pid}
 fi
-${cmd}
+bash -c "${cmd}"
 sh_pid_num=$( ps -ef | grep startup | grep sh | awk '{print $2}' | wc -l )
 if [ "$sh_pid_num" -le 1 ]; then
     echo do_while
@@ -17,7 +17,7 @@ if [ "$sh_pid_num" -le 1 ]; then
         sleep 5
         pid=$( ps -ef | grep ${jar_name} | grep java | awk '{print $2}' )
         if [ -z "$pid" ]; then
-            ${cmd}
+            bash -c "${cmd}"
         fi
     done &
     disown -a

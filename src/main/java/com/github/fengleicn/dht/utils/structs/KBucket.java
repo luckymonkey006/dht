@@ -1,6 +1,8 @@
 package com.github.fengleicn.dht.utils.structs;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,10 +21,14 @@ public class KBucket {
         return buket.get(0);
     }
 
-    public synchronized void add(KBucketNode KBucketNode) {
-        buket.add(KBucketNode);
-        if(buket.size() > 10000){
-            buket = new ArrayList<>(buket.subList(0, 10000/2));
+    public synchronized void add(KBucketNode kBucketNode) {
+        if(Arrays.equals(myKBucketNode.ip, kBucketNode.ip)) {
+            return;
+        }
+        final int MAX = 10000;
+        buket.add(kBucketNode);
+        if(buket.size() > MAX){
+            buket = new ArrayList<>(buket.subList(0, MAX / 2));
         }
     }
 
