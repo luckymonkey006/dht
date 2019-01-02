@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 jar_name='fengleicn_dht'
 id='2f12a82hashcode2f12a82'
-cmd="nohup java -Xmx512m -Xms512m -jar target/${filename}.jar ${id} &>err.log &"
+cmd="nohup java -Xmx512m -Xms512m -jar target/${jar_name}.jar ${id} &>err.log &"
 
 git pull
 mvn package
