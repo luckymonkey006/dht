@@ -3,14 +3,14 @@ package com.github.fengleicn.dht.utils.structs;
 import java.math.BigInteger;
 import java.util.*;
 
-public class KBucketOld {
+public class KBucketMeetStd {
     List<KBucketNode>[] buket;
     KBucketNode myKBucketNode;
     final static int K = 20;
     final static int KB_SIZE = 160;
 
     @SuppressWarnings("unchecked")
-    public KBucketOld(KBucketNode myKBucketNode) {
+    public KBucketMeetStd(KBucketNode myKBucketNode) {
         buket = new List[KB_SIZE];
         for (int i = 0; i < KB_SIZE; i++) {
             buket[i] = new Vector<>();
