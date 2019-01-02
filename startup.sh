@@ -24,5 +24,5 @@ bash -c "${cmd}"
 echo $( ps -ef | grep startup | grep sh | awk '{print $0}' )
 sh_pid_num=$( ps -ef | grep dht_demon_do_while | grep -v grep | awk '{print $2}' | wc -l )
 if [ "$sh_pid_num" -le 1 ]; then
-    bash -c "dht_demon_do_while"
+    dht_demon_do_while
 fi
