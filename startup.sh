@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+set -x
 jar_name='fengleicn_dht'
 cmd="nohup java -Xmx512m -Xms512m -jar target/${jar_name}.jar 1>err.log 2>&1 &"
 
@@ -10,6 +11,7 @@ if [ -n "$pid" ]; then
     kill -9 ${pid}
 fi
 bash -c "${cmd}"
+echo $( ps -ef | grep startup | grep sh | awk '{print $0}' )
 sh_pid_num=$( ps -ef | grep startup | grep sh | awk '{print $2}' | wc -l )
 if [ "$sh_pid_num" -le 1 ]; then
     echo do_while
