@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 jar_name='fengleicn_dht'
-id='2f12a82'
+id='2f12a82hashcode2f12a82'
 cmd="nohup java -Xmx512m -Xms512m -jar target/${filename}.jar ${id} &>err.log &"
 get_pid="ps -ef | grep ${jar_name} | grep ${id} | awk '{print $2}'"
 
