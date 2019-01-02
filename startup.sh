@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-set -x
 jar_name='fengleicn_dht'
 cmd="nohup java -Xmx512m -Xms512m -jar target/${jar_name}.jar 1>err.log 2>&1 &"
 dht_demon_do_while(){
