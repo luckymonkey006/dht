@@ -1,7 +1,6 @@
 #!/usr/bin/env sh
 jar_name='fengleicn_dht'
 cmd="nohup java -Xmx512m -Xms512m -jar target/${jar_name}.jar 1>err.log 2>&1 &"
-check_pid="ps -ef | grep ${jar_name} | grep java | awk '{print \$2}'"
 
 dht_demon_do_while(){
     while true; do
@@ -17,7 +16,7 @@ dht_demon_do_while(){
 git pull
 mvn package
 
-pid=$("$check_pid")
+pid=$(ps -ef | grep ${jar_name} | grep java | awk '{print \$2}')
 if [[ -n "$pid" ]]; then
     kill -9 ${pid}
 fi
