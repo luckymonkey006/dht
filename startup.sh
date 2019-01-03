@@ -6,7 +6,7 @@ check_pid="ps -ef | grep ${jar_name} | grep java | awk '{print $2}'"
 dht_demon_do_while(){
     while true; do
             sleep 5
-            pid=$( ps -ef | grep ${jar_name} | grep java | awk '{print $2}' )
+            pid=$( ps -ef | grep ${jar_name} | grep java | awk '{print \$2}' )
             if [[ -z "$pid" ]]; then
                 bash -c "${cmd}"
             fi
