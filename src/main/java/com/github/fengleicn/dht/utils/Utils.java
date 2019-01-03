@@ -7,6 +7,7 @@ import com.github.fengleicn.dht.utils.structs.UdpPacket;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -118,14 +119,7 @@ public class Utils {
     }
 
     public static boolean isBytesEqual(byte[] bytes1, byte[] bytes2) {
-        if (bytes1 == null || bytes2 == null || bytes1.length != bytes2.length)
-            return false;
-        for (int i = 0; i < bytes1.length; i++) {
-            if (bytes1[i] != bytes2[i]) {
-                return false;
-            }
-        }
-        return true;
+        return Arrays.equals(bytes1, bytes2);
     }
 
     public static byte[] randomBytes(int len) {

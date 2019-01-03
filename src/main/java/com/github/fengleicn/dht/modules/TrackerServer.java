@@ -4,9 +4,7 @@ import com.github.fengleicn.dht.utils.Utils;
 import com.github.fengleicn.dht.utils.structs.KBucketNode;
 import org.junit.Test;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -141,23 +139,22 @@ public class TrackerServer {
             Thread.sleep(1);
             new Thread(() -> {
                 ExtendBepNo9 extendBepNo9 = new ExtendBepNo9();
-                Socket socket = null;
-                try {
-                    String[] peerSplit = peer.split(":");
-                    socket = new Socket(peerSplit[0], Integer.valueOf(peerSplit[1]));
+                String[] peerSplit = peer.split(":");
+                try (
+                        Socket socket = new Socket(peerSplit[0], Integer.valueOf(peerSplit[1]))
+                ) {
                     socket.setSoTimeout(TCP_TIMEOUT);
-                    Boolean success = extendBepNo9.request(socket, infoHash);
-                    if (!Boolean.TRUE.equals(success)) {
-                        peerBlackList.add(peerSplit[0] + ":" + peerSplit[1]);
-                    }
-                    socket.close();
-                } catch (Exception e) {
-                    try {
-                        if (socket != null) {
-                            socket.close();
+                    try (
+                            InputStream inputStream = socket.getInputStream();
+                            OutputStream outputStream = socket.getOutputStream()
+                    ) {
+                        Boolean success = extendBepNo9.request(inputStream, outputStream, infoHash);
+                        if (!Boolean.TRUE.equals(success)) {
+                            peerBlackList.add(peerSplit[0] + ":" + peerSplit[1]);
                         }
-                    } catch (IOException ignored) {
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }).start();
         }
