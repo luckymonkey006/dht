@@ -1,12 +1,12 @@
 #!/usr/bin/env sh
 jar_name='fengleicn_dht'
 cmd="nohup java -Xmx512m -Xms512m -jar target/${jar_name}.jar 1>err.log 2>&1 &"
-check_pid="ps -ef | grep ${jar_name} | grep java | awk '{print $2}'"
+check_pid="ps -ef | grep ${jar_name} | grep java | awk '{print \$2}'"
 
 dht_demon_do_while(){
     while true; do
             sleep 5
-            pid=$( ps -ef | grep ${jar_name} | grep java | awk '{print \$2}' )
+            pid=$( ps -ef | grep ${jar_name} | grep java | awk '{print $2}' )
             if [[ -z "$pid" ]]; then
                 bash -c "${cmd}"
             fi
