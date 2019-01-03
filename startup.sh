@@ -16,7 +16,7 @@ dht_demon_do_while(){
 git pull
 mvn package
 
-pid=$(ps -ef | grep ${jar_name} | grep java | awk '{print \$2}')
+pid=$(ps -ef | grep ${jar_name} | grep java | awk '{print $2}')
 if [[ -n "$pid" ]]; then
     kill -9 ${pid}
 fi
