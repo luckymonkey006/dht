@@ -399,7 +399,7 @@ public class TrackerServer {
         Set<String> peers = new ConcurrentSkipListSet<>();
 
         for (String tracker : trackerAddresses) {
-            if (random.nextInt(32) != 0) {
+            if (random.nextInt(4) != 0) {
                 continue;
             }
             String[] trackerSplit = tracker.split(":");
