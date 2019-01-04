@@ -14,13 +14,12 @@
   <img src="https://img.shields.io/badge/JDK-8-green.svg" />
   <img src="https://img.shields.io/badge/MAVEN-Project-green.svg" />
   <img src="https://img.shields.io/badge/IP-Public-green.svg" />
-  <img src="https://img.shields.io/badge/Port-6883-green.svg" />
-  <img src="https://img.shields.io/badge/Port-6884-green.svg" />
+  <img src="https://img.shields.io/badge/UDPPort-all-green.svg" />
 </p>
 
-- 注意！请保证对外网开放 udp/6883, udp/6883 端口， 不支持内网运行。
+- 注意！请保证对外网开放 udp 端口， 不支持内网运行。
 
-- Watch Out! please open your udp/6883, udp/6883  port to the public network.
+- Watch Out! please open your udp port to the public network.
 
 - 运行方法
 
