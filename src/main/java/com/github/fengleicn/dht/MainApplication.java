@@ -10,10 +10,11 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 public class MainApplication {
+    public static final String myPort = "6883";
+    public static String myIp = null;
+
     public static void main(String[] args) throws Exception {
         System.out.println("[INFO] running...");
-        String myIp;
-        String myPort;
         CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost("http://pv.sohu.com/cityjson?ie=utf-8");
         HttpResponse httpResponse = closeableHttpClient.execute(httpPost);
@@ -21,7 +22,6 @@ public class MainApplication {
         String respJson = resPespString.split(" = ")[1];
         respJson = respJson.substring(0, respJson.length() - 1);
         myIp = JSON.parseObject(respJson).getString("cip");
-        myPort = "6883";
         new StartUp(myIp, Integer.valueOf(myPort)).startUp();
     }
 }
