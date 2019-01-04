@@ -403,12 +403,16 @@ public class TrackerServer {
             }
             String[] trackerSplit = tracker.split(":");
             String trackerHost = trackerSplit[0];
-            int trackerPort = Integer.valueOf(trackerSplit[1]);
+            int trackerPort = 80;
+            if(trackerSplit.length == 2) {
+                trackerPort = Integer.valueOf(trackerSplit[1]);
+            }
+            int finalTrackerPort = trackerPort;
             new Thread(() -> {
                 try {
-                    request(trackerHost, trackerPort, infoHash, peers);
+                    request(trackerHost, finalTrackerPort, infoHash, peers);
                 } catch (IOException e) {
-                    trackerLog.println("[ERROR] In tracker: " + trackerHost + ":" + trackerPort);
+                    trackerLog.println("[ERROR] In tracker: " + trackerHost + ":" + finalTrackerPort);
                     e.printStackTrace();
                 }
             }).start();
