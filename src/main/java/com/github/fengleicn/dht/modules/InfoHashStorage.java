@@ -59,7 +59,7 @@ public class InfoHashStorage {
     public void downloadMetadata() {
         for (; ; ) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
                 if (storage.size() > 1000) {
                     synchronized (this) {
                         storage.clear();
