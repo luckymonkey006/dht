@@ -22,6 +22,6 @@ if [[ -n "$pid" ]]; then
 fi
 
 bash -c "${cmd}"
-if [[ -n "$has_old_process" ]]; then
+if [[ -z "$has_old_process" ]]; then
     dont_dead_protect
 fi
