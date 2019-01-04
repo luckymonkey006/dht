@@ -57,7 +57,7 @@ public class InfoHashStorage {
     }
 
     public void downloadMetadata() {
-        for (;;) {
+        for (; ; ) {
             try {
                 Thread.sleep(500);
                 if (storage.size() > 1000) {
@@ -71,15 +71,9 @@ public class InfoHashStorage {
                 }
                 List<Map.Entry<String, TorrentInfo>> l = new ArrayList<>(storage.entrySet());
                 l.sort((o1, o2) -> {
-                    if (o1.getValue().fileName != null && o2.getValue().fileName != null) {
-                        return 0;
-                    } else if (o1.getValue().fileName != null) {
-                        return 1;
-                    } else if (o2.getValue().fileName != null) {
-                        return -1;
-                    } else {
-                        return o2.getValue().weight - o1.getValue().weight;
-                    }
+                    int o1Scale = o1.getValue().fileName != null ? 0 : 1;
+                    int o2Scale = o2.getValue().fileName != null ? 0 : 1;
+                    return o2.getValue().weight * o2Scale - o1.getValue().weight * o1Scale;
                 });
                 l.get(0).getValue().weight -= 100;
                 new Thread(() -> {
@@ -96,8 +90,8 @@ public class InfoHashStorage {
     }
 
     public void recordMetaData(String infoHash, String fileName) {
-        synchronized(this) {
-            if(infoHash.equalsIgnoreCase(StartUp.GET_PEER_INFO_HASH))
+        synchronized (this) {
+            if (infoHash.equalsIgnoreCase(StartUp.GET_PEER_INFO_HASH))
                 return;
             TorrentInfo torrentInfo = storage.get(infoHash);
             if (!fileName.equals(torrentInfo.fileName)) {
