@@ -400,6 +400,7 @@ public class TrackerServer {
         try (
                 DatagramSocket datagramSocket = new DatagramSocket(new InetSocketAddress(0))
         ) {
+            datagramSocket.setSoTimeout(UDP_TIMEOUT);
             for (String tracker : trackerAddresses) {
                 if (random.nextInt(32) != 0) {
                     continue;
@@ -413,7 +414,6 @@ public class TrackerServer {
                 int finalTrackerPort = trackerPort;
                 new Thread(() -> {
                     try {
-                        datagramSocket.setSoTimeout(UDP_TIMEOUT);
                         request(datagramSocket, trackerHost, finalTrackerPort, infoHash, peers);
                     } catch (IOException e) {
                         trackerLog.println("[ERROR] In tracker: " + trackerHost + ":" + finalTrackerPort);
