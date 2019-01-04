@@ -17,7 +17,7 @@ public class StartUp {
     private static final int SEC = 1000;
     private static final int GET_PEER_MS = 10;
     private static final int FIND_NODE_MS = 10;
-    private static final int CHANGE_NODE_ID_MS = 5 * SEC;
+    private static final int CHANGE_NODE_ID_MS = 60 * SEC;
     public static final String GET_PEER_INFO_HASH = "EEB7C79987A49F3CA816A951C404350A83C23C3C";
 
     public StartUp(String myIp, int myPort) throws SocketException, UnknownHostException {
