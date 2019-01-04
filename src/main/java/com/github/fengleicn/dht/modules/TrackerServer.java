@@ -166,7 +166,7 @@ public class TrackerServer {
     }
 
     public static void request(String host, int port, String infoHash, Set<String> peers) throws IOException {
-        DatagramSocket datagramSocket = new DatagramSocket( new InetSocketAddress(MainApplication.myIp,0));
+        DatagramSocket datagramSocket = new DatagramSocket( new InetSocketAddress("0.0.0.0",0));
         datagramSocket.setSoTimeout(UDP_TIMEOUT);
 
         byte[] buf;
