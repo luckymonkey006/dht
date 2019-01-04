@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class TrackerServer {
     static final int SEC = 1000;
     static final int TCP_TIMEOUT = 20 * SEC;
-    static final int UDP_TIMEOUT = 5 * SEC;
+    static final int UDP_TIMEOUT = 4 * SEC;
 
     public static PrintWriter trackerLog;
     private static final Random random = new Random();
@@ -398,19 +398,23 @@ public class TrackerServer {
 
         Set<String> peers = new ConcurrentSkipListSet<>();
         for (String tracker : trackerAddresses) {
-            if(random.nextInt(10) != 0){
+            if (random.nextInt(32) != 0) {
                 continue;
             }
             String[] trackerSplit = tracker.split(":");
             String trackerHost = trackerSplit[0];
             int trackerPort = 80;
-            if(trackerSplit.length == 2) {
+            if (trackerSplit.length == 2) {
                 trackerPort = Integer.valueOf(trackerSplit[1]);
             }
             int finalTrackerPort = trackerPort;
+
             new Thread(() -> {
-                try {
-                    request(trackerHost, finalTrackerPort, infoHash, peers);
+                try (
+                        DatagramSocket datagramSocket = new DatagramSocket(new InetSocketAddress(0))
+                ) {
+                    datagramSocket.setSoTimeout(UDP_TIMEOUT);
+                    request(datagramSocket, trackerHost, finalTrackerPort, infoHash, peers);
                 } catch (IOException e) {
                     trackerLog.println("[ERROR] In tracker: " + trackerHost + ":" + finalTrackerPort);
                     e.printStackTrace();
@@ -450,9 +454,7 @@ public class TrackerServer {
         }
     }
 
-    public static void request(String host, int port, String infoHash, Set<String> peers) throws IOException {
-        DatagramSocket datagramSocket = new DatagramSocket( new InetSocketAddress(0));
-        datagramSocket.setSoTimeout(UDP_TIMEOUT);
+    public static void request(DatagramSocket datagramSocket, String host, int port, String infoHash, Set<String> peers) throws IOException {
 
         byte[] buf;
         /**
