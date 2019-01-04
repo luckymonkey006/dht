@@ -8,16 +8,17 @@
   <img src="https://img.shields.io/badge/test-pass-green.svg" />
 </p>
 
-- 依赖 (Depend on)
 
-<p align=left>
+<p align=center>
+  <img src="https://img.shields.io/badge/依赖-depend_on-green.svg" />
   <img src="https://img.shields.io/badge/JDK-8-green.svg" />
   <img src="https://img.shields.io/badge/MAVEN-Project-green.svg" />
   <img src="https://img.shields.io/badge/IP-Public-green.svg" />
   <img src="https://img.shields.io/badge/Port-6883-green.svg" />
+  <img src="https://img.shields.io/badge/Port-6884-green.svg" />
 </p>
 
-- 注意！请保证对外网开放 udp/6883 端口， 不支持内网运行。
+- 注意！请保证对外网开放 udp/6883, udp/6883 端口， 不支持内网运行。
 
 - Watch Out! please open your udp/6883 port to the public network.
 
