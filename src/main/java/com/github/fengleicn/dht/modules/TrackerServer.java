@@ -513,7 +513,7 @@ public class TrackerServer {
                     .put(connIdRecvBytes).putInt(1)
                     .putInt(TRANS_ID).put(Utils.getBytesFromHex(infoHash))
                     .put(Utils.randomBytes(20)).put(zeroByte36)
-                    .putInt(TRANS_ID).putInt(256).put(zeroByte4).array();
+                    .putInt(TRANS_ID).putInt(256).put(Utils.randomBytes(4)).array();
             packet = new DatagramPacket(buf, buf.length, new InetSocketAddress(host, port));
             datagramSocket.send(packet);
             int LEN = 1694;
