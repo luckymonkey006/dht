@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
+
+bash<<EOF
 jar_name="fengleicn_dht.jar"
-run_command="nohup java -Xmx512m -Xms512m -jar target/${jar_name}.jar 1>err.log 2>&1 &"
+run_command="nohup java -Xmx512m -Xms512m -jar target/${jar_name} 1>err.log 2>&1 &"
 dont_dead_protect(){
     while true; do
             sleep 5
@@ -25,3 +27,4 @@ bash -c "${run_command}"
 if [[ -z "$has_old_process" ]]; then
     dont_dead_protect
 fi
+EOF
