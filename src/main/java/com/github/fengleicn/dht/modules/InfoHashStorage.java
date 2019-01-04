@@ -75,7 +75,11 @@ public class InfoHashStorage {
                     int o2Scale = o2.getValue().fileName != null ? 0 : 1;
                     return o2.getValue().weight * o2Scale - o1.getValue().weight * o1Scale;
                 });
-                l.get(0).getValue().weight -= 100;
+                if (l.get(0).getValue().weight > 400) {
+                    l.get(0).getValue().weight -= 400;
+                } else {
+                    l.get(0).getValue().weight = 0;
+                }
                 new Thread(() -> {
                     try {
                         TrackerServer.request(l.get(0).getKey());
