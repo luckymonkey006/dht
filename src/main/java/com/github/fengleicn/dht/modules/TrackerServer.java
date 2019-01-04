@@ -421,8 +421,8 @@ public class TrackerServer {
                     }
                 }).start();
             }
+            Thread.sleep(4000); //等上面的线程结束
         }
-        Thread.sleep(4000); //等上面的线程结束
         trackerLog.println("[INFO]  Downloading: " + infoHash + ": \n" + "        IP: " + peers.toString() + "\n");
         Set<String> peersCopy = new HashSet<>(peers);
         final int MAX = 500;
