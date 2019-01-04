@@ -1,8 +1,7 @@
 #!/usr/bin/env sh
-jar_name='fengleicn_dht'
+jar_name="fengleicn_dht"
 cmd="nohup java -Xmx512m -Xms512m -jar target/${jar_name}.jar 1>err.log 2>&1 &"
-
-dht_demon_do_while(){
+dont_dead_protect(){
     while true; do
             sleep 5
             pid=$( ps -ef | grep ${jar_name} | grep java | awk '{print $2}' )
@@ -19,9 +18,10 @@ mvn package
 pid=$(ps -ef | grep ${jar_name} | grep java | awk '{print $2}')
 if [[ -n "$pid" ]]; then
     kill -9 ${pid}
+    has_old_process="true"
 fi
+
 bash -c "${cmd}"
-sh_pid_num=$( ps -ef | grep dht_demon_do_while | grep -v grep | awk '{print $2}' | wc -l )
-if [[ "$sh_pid_num" -le 1 ]]; then
-    dht_demon_do_while
+if [[ -n "$has_old_process" ]]; then
+    dont_dead_protect
 fi
