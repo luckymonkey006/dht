@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class TrackerServer {
     static final int SEC = 1000;
@@ -113,7 +114,7 @@ public class TrackerServer {
                 "agusiq-torrents.pl:6969"
         };
 
-        Set<String> peers = new HashSet<>();
+        Set<String> peers = new ConcurrentSkipListSet<>();
         for (String tracker : trackerAddresses) {
             String[] trackerSplit = tracker.split(":");
             String trackerHost = trackerSplit[0];
