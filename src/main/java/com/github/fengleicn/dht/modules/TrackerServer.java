@@ -417,7 +417,7 @@ public class TrackerServer {
                         request(datagramSocket, trackerHost, finalTrackerPort, infoHash, peers);
                     } catch (IOException e) {
                         trackerLog.println("[ERROR] In tracker: " + trackerHost + ":" + finalTrackerPort);
-                        e.printStackTrace();
+                        e.printStackTrace(trackerLog);
                     }
                 }).start();
             }
@@ -482,7 +482,6 @@ public class TrackerServer {
             datagramSocket.receive(packet);
         } catch (Exception e) {
 //            e.printStackTrace();
-            datagramSocket.close();
             return;
         }
 
@@ -525,13 +524,11 @@ public class TrackerServer {
             datagramSocket.receive(packet);
         } catch (Exception e) {
 //            e.printStackTrace();
-            datagramSocket.close();
             return;
         }
 
         int packetLength = packet.getLength();
         buf = packet.getData();
-        datagramSocket.close();
         for (int i = 20; i + 6 <= packetLength; i += 6) {
             byte[] remoteAddress = Arrays.copyOfRange(buf, i, i + 6);
             if (peerBlackList.contains(Utils.getHostIpFromBytes(remoteAddress) + ":" + Utils.getIntFromBytes(remoteAddress)))
