@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-
 jar_name="fengleicn_dht.jar"
 run_command="nohup java -Xmx512m -Xms512m -jar target/${jar_name} 1>err.log 2>&1 &"
 dont_dead_protect(){
