@@ -397,29 +397,30 @@ public class TrackerServer {
         };
 
         Set<String> peers = new ConcurrentSkipListSet<>();
-        for (String tracker : trackerAddresses) {
-            if (random.nextInt(32) != 0) {
-                continue;
-            }
-            String[] trackerSplit = tracker.split(":");
-            String trackerHost = trackerSplit[0];
-            int trackerPort = 80;
-            if (trackerSplit.length == 2) {
-                trackerPort = Integer.valueOf(trackerSplit[1]);
-            }
-            int finalTrackerPort = trackerPort;
-
-            new Thread(() -> {
-                try (
-                        DatagramSocket datagramSocket = new DatagramSocket(new InetSocketAddress(0))
-                ) {
-                    datagramSocket.setSoTimeout(UDP_TIMEOUT);
-                    request(datagramSocket, trackerHost, finalTrackerPort, infoHash, peers);
-                } catch (IOException e) {
-                    trackerLog.println("[ERROR] In tracker: " + trackerHost + ":" + finalTrackerPort);
-                    e.printStackTrace();
+        try (
+                DatagramSocket datagramSocket = new DatagramSocket(new InetSocketAddress(0))
+        ) {
+            for (String tracker : trackerAddresses) {
+                if (random.nextInt(32) != 0) {
+                    continue;
                 }
-            }).start();
+                String[] trackerSplit = tracker.split(":");
+                String trackerHost = trackerSplit[0];
+                int trackerPort = 80;
+                if (trackerSplit.length == 2) {
+                    trackerPort = Integer.valueOf(trackerSplit[1]);
+                }
+                int finalTrackerPort = trackerPort;
+                new Thread(() -> {
+                    try {
+                        datagramSocket.setSoTimeout(UDP_TIMEOUT);
+                        request(datagramSocket, trackerHost, finalTrackerPort, infoHash, peers);
+                    } catch (IOException e) {
+                        trackerLog.println("[ERROR] In tracker: " + trackerHost + ":" + finalTrackerPort);
+                        e.printStackTrace();
+                    }
+                }).start();
+            }
         }
         Thread.sleep(4000); //等上面的线程结束
         trackerLog.println("[INFO]  Downloading: " + infoHash + ": \n" + "        IP: " + peers.toString() + "\n");
