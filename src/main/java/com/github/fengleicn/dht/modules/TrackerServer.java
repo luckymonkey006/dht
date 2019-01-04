@@ -1,5 +1,6 @@
 package com.github.fengleicn.dht.modules;
 
+import com.github.fengleicn.dht.MainApplication;
 import com.github.fengleicn.dht.utils.Utils;
 import com.github.fengleicn.dht.utils.structs.KBucketNode;
 import org.junit.Test;
@@ -165,7 +166,7 @@ public class TrackerServer {
     }
 
     public static void request(String host, int port, String infoHash, Set<String> peers) throws IOException {
-        DatagramSocket datagramSocket = new DatagramSocket( new InetSocketAddress(0));
+        DatagramSocket datagramSocket = new DatagramSocket( new InetSocketAddress(MainApplication.myIp,0));
         datagramSocket.setSoTimeout(UDP_TIMEOUT);
 
         byte[] buf;
