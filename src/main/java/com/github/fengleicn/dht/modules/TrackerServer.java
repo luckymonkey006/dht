@@ -397,32 +397,28 @@ public class TrackerServer {
         };
 
         Set<String> peers = new ConcurrentSkipListSet<>();
-        try (
-                DatagramSocket datagramSocket = new DatagramSocket(new InetSocketAddress(0))
-        ) {
-            datagramSocket.setSoTimeout(UDP_TIMEOUT);
-            for (String tracker : trackerAddresses) {
-                if (random.nextInt(32) != 0) {
-                    continue;
-                }
-                String[] trackerSplit = tracker.split(":");
-                String trackerHost = trackerSplit[0];
-                int trackerPort = 80;
-                if (trackerSplit.length == 2) {
-                    trackerPort = Integer.valueOf(trackerSplit[1]);
-                }
-                int finalTrackerPort = trackerPort;
-                new Thread(() -> {
-                    try {
-                        request(datagramSocket, trackerHost, finalTrackerPort, infoHash, peers);
-                    } catch (IOException e) {
-                        trackerLog.println("[ERROR] In tracker: " + trackerHost + ":" + finalTrackerPort);
-                        e.printStackTrace(trackerLog);
-                    }
-                }).start();
+
+        for (String tracker : trackerAddresses) {
+            if (random.nextInt(32) != 0) {
+                continue;
             }
-            Thread.sleep(4000); //等上面的线程结束
+            String[] trackerSplit = tracker.split(":");
+            String trackerHost = trackerSplit[0];
+            int trackerPort = 80;
+            if (trackerSplit.length == 2) {
+                trackerPort = Integer.valueOf(trackerSplit[1]);
+            }
+            int finalTrackerPort = trackerPort;
+            new Thread(() -> {
+                try {
+                    request(trackerHost, finalTrackerPort, infoHash, peers);
+                } catch (IOException e) {
+                    trackerLog.println("[ERROR] In tracker: " + trackerHost + ":" + finalTrackerPort);
+                    e.printStackTrace(trackerLog);
+                }
+            }).start();
         }
+        Thread.sleep(4000); //等上面的线程结束
         trackerLog.println("[INFO]  Downloading: " + infoHash + ": \n" + "        IP: " + peers.toString() + "\n");
         Set<String> peersCopy = new HashSet<>(peers);
         final int MAX = 500;
@@ -455,87 +451,91 @@ public class TrackerServer {
         }
     }
 
-    public static void request(DatagramSocket datagramSocket, String host, int port, String infoHash, Set<String> peers) throws IOException {
+    public static void request(String host, int port, String infoHash, Set<String> peers) throws IOException {
+        try (
+                DatagramSocket datagramSocket = new DatagramSocket(new InetSocketAddress(0))
+        ) {
+            datagramSocket.setSoTimeout(UDP_TIMEOUT);
+            byte[] buf;
+            /**
+             * Offset  Size            Name            Value
+             * 0       64-bit integer  protocol_id     0x41727101980 // magic constant
+             * 8       32-bit integer  action          0 // connect
+             * 12      32-bit integer  transaction_id
+             * 16
+             */
+            buf = ByteBuffer.allocate(16).putLong(0x41727101980L).putInt(0).putInt(TRANS_ID).array();
 
-        byte[] buf;
-        /**
-         * Offset  Size            Name            Value
-         * 0       64-bit integer  protocol_id     0x41727101980 // magic constant
-         * 8       32-bit integer  action          0 // connect
-         * 12      32-bit integer  transaction_id
-         * 16
-         */
-        buf = ByteBuffer.allocate(16).putLong(0x41727101980L).putInt(0).putInt(TRANS_ID).array();
+            SocketAddress socketAddress;
+            DatagramPacket packet;
+            try {
+                socketAddress = new InetSocketAddress(host, port);
+                packet = new DatagramPacket(buf, buf.length, socketAddress);
+            } catch (Exception e) {
+                System.err.println(host + "  " + port);
+                return;
+            }
+            datagramSocket.send(packet);
 
-        SocketAddress socketAddress;
-        DatagramPacket packet;
-        try {
-            socketAddress = new InetSocketAddress(host, port);
-            packet = new DatagramPacket(buf, buf.length, socketAddress);
-        } catch (Exception e) {
-            System.err.println(host + "  " + port);
-            return;
-        }
-        datagramSocket.send(packet);
-
-        try {
-            datagramSocket.receive(packet);
-        } catch (Exception e) {
+            try {
+                datagramSocket.receive(packet);
+            } catch (Exception e) {
 //            e.printStackTrace();
-            return;
-        }
+                return;
+            }
 
-        buf = packet.getData();
-        byte[] transIdRecvBytes = Arrays.copyOfRange(buf, 4, 8);
-        byte[] connIdRecvBytes = Arrays.copyOfRange(buf, 8, 16);
-        int transIdRecv = ByteBuffer.allocate(4).put(transIdRecvBytes).getInt(0);
-        if (transIdRecv != TRANS_ID)
-            return;
+            buf = packet.getData();
+            byte[] transIdRecvBytes = Arrays.copyOfRange(buf, 4, 8);
+            byte[] connIdRecvBytes = Arrays.copyOfRange(buf, 8, 16);
+            int transIdRecv = ByteBuffer.allocate(4).put(transIdRecvBytes).getInt(0);
+            if (transIdRecv != TRANS_ID)
+                return;
 
-        /**
-         *Offset  Size    Name    Value
-         * 0       64-bit integer  connection_id
-         * 8       32-bit integer  action          1 // announce
-         * 12      32-bit integer  transaction_id
-         * 16      20-byte string  info_hash
-         * 36      20-byte string  peer_id
-         * 56      64-bit integer  downloaded
-         * 64      64-bit integer  left
-         * 72      64-bit integer  uploaded
-         * 80      32-bit integer  event           0 // 0: none; 1: completed; 2: started; 3: stopped
-         * 84      32-bit integer  IP address      0 // default
-         * 88      32-bit integer  key
-         * 92      32-bit integer  num_want        -1 // default
-         * 96      16-bit integer  port
-         * 98
-         */
+            /**
+             *Offset  Size    Name    Value
+             * 0       64-bit integer  connection_id
+             * 8       32-bit integer  action          1 // announce
+             * 12      32-bit integer  transaction_id
+             * 16      20-byte string  info_hash
+             * 36      20-byte string  peer_id
+             * 56      64-bit integer  downloaded
+             * 64      64-bit integer  left
+             * 72      64-bit integer  uploaded
+             * 80      32-bit integer  event           0 // 0: none; 1: completed; 2: started; 3: stopped
+             * 84      32-bit integer  IP address      0 // default
+             * 88      32-bit integer  key
+             * 92      32-bit integer  num_want        -1 // default
+             * 96      16-bit integer  port
+             * 98
+             */
 
-        buf = ByteBuffer.allocate(104)
-                .put(connIdRecvBytes).putInt(1)
-                .putInt(TRANS_ID).put(Utils.getBytesFromHex(infoHash))
-                .put(Utils.randomBytes(20)).put(zeroByte36)
-                .putInt(TRANS_ID).putInt(256).put(zeroByte4).array();
-        packet = new DatagramPacket(buf, buf.length, new InetSocketAddress(host, port));
-        datagramSocket.send(packet);
-        int LEN = 1694;
-        packet = new DatagramPacket(new byte[LEN], LEN);
+            buf = ByteBuffer.allocate(104)
+                    .put(connIdRecvBytes).putInt(1)
+                    .putInt(TRANS_ID).put(Utils.getBytesFromHex(infoHash))
+                    .put(Utils.randomBytes(20)).put(zeroByte36)
+                    .putInt(TRANS_ID).putInt(256).put(zeroByte4).array();
+            packet = new DatagramPacket(buf, buf.length, new InetSocketAddress(host, port));
+            datagramSocket.send(packet);
+            int LEN = 1694;
+            packet = new DatagramPacket(new byte[LEN], LEN);
 
-        try {
-            datagramSocket.receive(packet);
-        } catch (Exception e) {
+            try {
+                datagramSocket.receive(packet);
+            } catch (Exception e) {
 //            e.printStackTrace();
-            return;
-        }
+                return;
+            }
 
-        int packetLength = packet.getLength();
-        buf = packet.getData();
-        for (int i = 20; i + 6 <= packetLength; i += 6) {
-            byte[] remoteAddress = Arrays.copyOfRange(buf, i, i + 6);
-            if (peerBlackList.contains(Utils.getHostIpFromBytes(remoteAddress) + ":" + Utils.getIntFromBytes(remoteAddress)))
-                continue;
-            String peerIp = Utils.getHostIpFromBytes(remoteAddress);
-            int peerPort = Integer.parseInt(Utils.getIntFromBytes(remoteAddress));
-            peers.add(peerIp + ":" + peerPort);
+            int packetLength = packet.getLength();
+            buf = packet.getData();
+            for (int i = 20; i + 6 <= packetLength; i += 6) {
+                byte[] remoteAddress = Arrays.copyOfRange(buf, i, i + 6);
+                if (peerBlackList.contains(Utils.getHostIpFromBytes(remoteAddress) + ":" + Utils.getIntFromBytes(remoteAddress)))
+                    continue;
+                String peerIp = Utils.getHostIpFromBytes(remoteAddress);
+                int peerPort = Integer.parseInt(Utils.getIntFromBytes(remoteAddress));
+                peers.add(peerIp + ":" + peerPort);
+            }
         }
     }
 }
