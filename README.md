@@ -20,7 +20,7 @@
 
 - 注意！请保证对外网开放 udp/6883, udp/6883 端口， 不支持内网运行。
 
-- Watch Out! please open your udp/6883 port to the public network.
+- Watch Out! please open your udp/6883, udp/6883  port to the public network.
 
 - 运行方法
 
