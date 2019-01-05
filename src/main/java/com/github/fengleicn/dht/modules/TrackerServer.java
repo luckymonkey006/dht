@@ -474,6 +474,7 @@ public class TrackerServer {
                 packet = new DatagramPacket(buf, buf.length, socketAddress);
             } catch (Exception e) {
                 System.err.println(host + "  " + port);
+                e.printStackTrace();
                 return peers;
             }
             datagramSocket.send(packet);
