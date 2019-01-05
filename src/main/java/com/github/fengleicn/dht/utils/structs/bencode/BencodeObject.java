@@ -70,7 +70,8 @@ public class BencodeObject {
             }
         }
         System.err.println(this.toString());
-        throw new RuntimeException("not find key-value");
+        System.err.println("not find key-value");
+        return null;
     }
 
     public BencodeObject get(String k) {
