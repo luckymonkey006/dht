@@ -7,6 +7,7 @@ import com.github.fengleicn.dht.utils.structs.KBucketNode;
 import com.github.fengleicn.dht.utils.structs.UdpPacket;
 
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,6 +60,12 @@ public class UdpUtils {
                         kBucket.add(KBucketNode);
                 } else if (Utils.isBytesEqual(b.get("t").castToBytes(), new byte[]{'g', 'p'})) {
                     //get peer
+                    List<BencodeObject> list = b.get("r").get("values").fetch();
+                    if(list != null && !list.isEmpty()){
+                        for(BencodeObject o : list){
+                            System.out.println("get_peer: rsp " + Arrays.toString(o.castToBytes()));
+                        }
+                    }
                 } else if (Utils.isBytesEqual(b.get("t").castToBytes(), new byte[]{'a', 'p'})) {
                     //announce peer
                 }
