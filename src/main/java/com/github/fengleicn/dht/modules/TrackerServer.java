@@ -149,8 +149,10 @@ public class TrackerServer {
                         if (random.nextInt(30) != 0) {
                             return;
                         }
+                        trackerLog.println("tcp: " + tracker);
                         peers.addAll(request(tracker, infoHash.replaceAll("(.{2})", "%$1")));
                     } else {
+                        trackerLog.println("udp: " + tracker);
                         peers.addAll(request(trackerHost, finalTrackerPort, infoHash));
                     }
                 } catch (IOException e) {
