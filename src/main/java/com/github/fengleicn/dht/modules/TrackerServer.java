@@ -146,7 +146,7 @@ public class TrackerServer {
             new Thread(() -> {
                 try {
                     if(trackerHost.startsWith("http")){
-                        peers.addAll(request(tracker, "%" + infoHash.replaceAll("(.{2})", "$1%")));
+                        peers.addAll(request(tracker,  infoHash.replaceAll("(.{2})", "%$1")));
                     }else {
                         peers.addAll(request(trackerHost, finalTrackerPort, infoHash));
                     }
