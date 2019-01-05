@@ -411,7 +411,7 @@ public class TrackerServer {
             int finalTrackerPort = trackerPort;
             new Thread(() -> {
                 try {
-                    request(trackerHost, finalTrackerPort, infoHash, peers);
+                    peers.addAll(request(trackerHost, finalTrackerPort, infoHash));
                 } catch (IOException e) {
                     trackerLog.println("[ERROR] In tracker: " + trackerHost + ":" + finalTrackerPort);
                     e.printStackTrace(trackerLog);
@@ -451,10 +451,11 @@ public class TrackerServer {
         }
     }
 
-    public static void request(String host, int port, String infoHash, Set<String> peers) throws IOException {
+    public static Set<String> request(String host, int port, String infoHash) throws IOException {
         try (
                 DatagramSocket datagramSocket = new DatagramSocket(new InetSocketAddress(0))
         ) {
+            Set<String> peers = new HashSet<>();
             datagramSocket.setSoTimeout(UDP_TIMEOUT);
             byte[] buf;
             /**
@@ -473,7 +474,7 @@ public class TrackerServer {
                 packet = new DatagramPacket(buf, buf.length, socketAddress);
             } catch (Exception e) {
                 System.err.println(host + "  " + port);
-                return;
+                return peers;
             }
             datagramSocket.send(packet);
 
@@ -481,7 +482,7 @@ public class TrackerServer {
                 datagramSocket.receive(packet);
             } catch (Exception e) {
 //            e.printStackTrace();
-                return;
+                return peers;
             }
 
             buf = packet.getData();
@@ -489,7 +490,7 @@ public class TrackerServer {
             byte[] connIdRecvBytes = Arrays.copyOfRange(buf, 8, 16);
             int transIdRecv = ByteBuffer.allocate(4).put(transIdRecvBytes).getInt(0);
             if (transIdRecv != TRANS_ID)
-                return;
+                return peers;
 
             /**
              *Offset  Size    Name    Value
@@ -523,7 +524,7 @@ public class TrackerServer {
                 datagramSocket.receive(packet);
             } catch (Exception e) {
 //            e.printStackTrace();
-                return;
+                return peers;
             }
 
             int packetLength = packet.getLength();
@@ -536,6 +537,11 @@ public class TrackerServer {
                 int peerPort = Integer.parseInt(Utils.getIntFromBytes(remoteAddress));
                 peers.add(peerIp + ":" + peerPort);
             }
+            return peers;
         }
+    }
+
+    public static void request(String tracckerHost, String trackerPort, String requestInfoHash){
+
     }
 }
