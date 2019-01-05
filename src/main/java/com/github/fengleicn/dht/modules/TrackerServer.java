@@ -48,7 +48,7 @@ public class TrackerServer {
         peerBlackList.add("0.0.0.0:65535");
     }
 
-//    @Test
+    //    @Test
     public static void test001(String[] args) throws InterruptedException, IOException {
         new TrackerServer().request("EEB7C79987A49F3CA816A951C404350A83C23C3C");
     }
@@ -145,9 +145,9 @@ public class TrackerServer {
             int finalTrackerPort = trackerPort;
             new Thread(() -> {
                 try {
-                    if(trackerHost.startsWith("http")){
-                        peers.addAll(request(tracker,  infoHash.replaceAll("(.{2})", "%$1")));
-                    }else {
+                    if (trackerHost.startsWith("http")) {
+                        peers.addAll(request(tracker, infoHash.replaceAll("(.{2})", "%$1")));
+                    } else {
                         peers.addAll(request(trackerHost, finalTrackerPort, infoHash));
                     }
                 } catch (IOException e) {
@@ -280,11 +280,11 @@ public class TrackerServer {
         }
     }
 
-    public static Set<String> request(String tracckerUrl, String requestInfoHash){
+    public static Set<String> request(String tracckerUrl, String requestInfoHash) {
         Set<String> peers = new HashSet<>();
         try {
             CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
-            HttpGet httpGet = new HttpGet(tracckerUrl + "?" + "info_hash=" + requestInfoHash);
+            HttpGet httpGet = new HttpGet(tracckerUrl + "?" + "info_hash=" + requestInfoHash + "&peer_id=" + requestInfoHash + "&port=6881&left=0&downloaded=100&uploaded=0&compact=1");
             HttpResponse httpResponse = closeableHttpClient.execute(httpGet);
             byte[] respBytes = EntityUtils.toByteArray(httpResponse.getEntity());
             System.out.println(new String(respBytes));
@@ -306,9 +306,9 @@ public class TrackerServer {
     }
 
     @Test
-    public void test001(){
+    public void test001() {
         System.out.println(URLEncoder.encode("EEB7C79987A49F3CA816A951C404350A83C23C3C"));
-        request("http://tracker2.itzmx.com:6961/announce",  "%EE%B7%C7%99%87%A4%9F%3C%A8%16%A9%51%C4%04%35%0A%83%C2%3C%3C");
+        request("http://tracker2.itzmx.com:6961/announce", "%EE%B7%C7%99%87%A4%9F%3C%A8%16%A9%51%C4%04%35%0A%83%C2%3C%3C");
 
     }
 }
