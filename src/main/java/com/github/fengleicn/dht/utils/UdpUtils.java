@@ -60,10 +60,13 @@ public class UdpUtils {
                         kBucket.add(KBucketNode);
                 } else if (Utils.isBytesEqual(b.get("t").castToBytes(), new byte[]{'g', 'p'})) {
                     //get peer
-                    List<BencodeObject> list = b.get("r").get("values").fetch();
-                    if(list != null && !list.isEmpty()){
-                        for(BencodeObject o : list){
-                            System.out.println("get_peer: rsp " + Arrays.toString(o.castToBytes()));
+                    BencodeObject bencodeObject = b.get("r").get("values");
+                    if (bencodeObject != null) {
+                        List<BencodeObject> list = bencodeObject.fetch();
+                        if (list != null && !list.isEmpty()) {
+                            for (BencodeObject o : list) {
+                                System.out.println("get_peer: rsp " + Arrays.toString(o.castToBytes()));
+                            }
                         }
                     }
                 } else if (Utils.isBytesEqual(b.get("t").castToBytes(), new byte[]{'a', 'p'})) {
