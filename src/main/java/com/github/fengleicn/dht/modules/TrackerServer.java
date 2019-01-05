@@ -3,6 +3,16 @@ package com.github.fengleicn.dht.modules;
 import com.github.fengleicn.dht.MainApplication;
 import com.github.fengleicn.dht.utils.Utils;
 import com.github.fengleicn.dht.utils.structs.KBucketNode;
+import com.github.fengleicn.dht.utils.structs.bencode.BencodeObject;
+import com.github.fengleicn.dht.utils.structs.bencode.utils.BencodeUtil;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
 import java.io.*;
@@ -38,7 +48,7 @@ public class TrackerServer {
         peerBlackList.add("0.0.0.0:65535");
     }
 
-    @Test
+//    @Test
     public static void test001(String[] args) throws InterruptedException, IOException {
         new TrackerServer().request("EEB7C79987A49F3CA816A951C404350A83C23C3C");
     }
@@ -84,8 +94,40 @@ public class TrackerServer {
                 "tracker.kamigami.org:2710",
                 "tracker.justseed.it:1337",
                 "packages.crunchbangplusplus.org:6969",
-                "newtoncity.org:6969"
-
+                "newtoncity.org:6969",
+                //HTTP
+                "http://tracker.internetwarriors.net:1337/announce",
+                "http://tracker2.itzmx.com:6961/announce",
+                "http://tracker1.itzmx.com:8080/announce",
+                "http://explodie.org:6969/announce",
+                "http://tracker.port443.xyz:6969/announce",
+                "http://tracker1.wasabii.com.tw:6969/announce",
+                "http://private.minimafia.nl:443/announce",
+                "http://prestige.minimafia.nl:443/announce",
+                "http://open.acgnxtracker.com:80/announce",
+                "http://opentracker.xyz:80/announce",
+                "http://open.trackerlist.xyz:80/announce",
+                "http://tracker3.itzmx.com:6961/announce",
+                "http://torrent.nwps.ws:80/announce",
+                "http://torrentclub.tech:6969/announce",
+                "http://tracker4.itzmx.com:2710/announce",
+                "http://tracker.torrentyorg.pl:80/announce",
+                "http://tracker.open-tracker.org:1337/announce",
+                "http://tracker.gbitt.info:80/announce",
+                "http://tracker.city9x.com:2710/announce",
+                "http://t.nyaatracker.com:80/announce",
+                "http://retracker.mgts.by:80/announce",
+                "http://open.acgtracker.com:1096/announce",
+                "http://fxtt.ru:80/announce",
+                "http://bt.artvid.ru:6969/announce",
+                "http://0d.kebhana.mx:443/announce",
+                "http://tracker.tfile.me:80/announce.php",
+                "http://tracker.tfile.me:80/announce",
+                "http://tracker.tfile.co:80/announce",
+                "http://share.camoe.cn:8080/announce",
+                "http://peersteers.org:80/announce",
+                "http://omg.wtftrackr.pw:1337/announce",
+                "http://newtoncity.org:6969/announce",
         };
 
         Set<String> peers = new ConcurrentSkipListSet<>();
@@ -103,14 +145,18 @@ public class TrackerServer {
             int finalTrackerPort = trackerPort;
             new Thread(() -> {
                 try {
-                    peers.addAll(request(trackerHost, finalTrackerPort, infoHash));
+                    if(trackerHost.startsWith("http")){
+                        peers.addAll(request(tracker, "%" + infoHash.replaceAll("(.{2})", "$1%")));
+                    }else {
+                        peers.addAll(request(trackerHost, finalTrackerPort, infoHash));
+                    }
                 } catch (IOException e) {
                     trackerLog.println("[ERROR] In tracker: " + trackerHost + ":" + finalTrackerPort);
                     e.printStackTrace(trackerLog);
                 }
             }).start();
         }
-        Thread.sleep(4000); //等上面的线程结束
+        Thread.sleep(6000); //等上面的线程结束
         trackerLog.println("[INFO]  Downloading: " + infoHash + ": \n" + "        IP: " + peers.toString() + "\n");
         Set<String> peersCopy = new HashSet<>(peers);
         final int MAX = 500;
@@ -234,7 +280,35 @@ public class TrackerServer {
         }
     }
 
-    public static void request(String tracckerHost, String trackerPort, String requestInfoHash){
+    public static Set<String> request(String tracckerUrl, String requestInfoHash){
+        Set<String> peers = new HashSet<>();
+        try {
+            CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
+            HttpGet httpGet = new HttpGet(tracckerUrl + "?" + "info_hash=" + requestInfoHash);
+            HttpResponse httpResponse = closeableHttpClient.execute(httpGet);
+            byte[] respBytes = EntityUtils.toByteArray(httpResponse.getEntity());
+            System.out.println(new String(respBytes));
+            BencodeObject bencodeObject = BencodeUtil.parse(respBytes);
+            byte[] buf = bencodeObject.get("peers").castToBytes();
+            for (int i = 0; i + 6 <= buf.length; i += 6) {
+                byte[] remoteAddress = Arrays.copyOfRange(buf, i, i + 6);
+                String peerIp = Utils.getHostIpFromBytes(remoteAddress);
+                int peerPort = Integer.parseInt(Utils.getIntFromBytes(remoteAddress));
+                peers.add(peerIp + ":" + peerPort);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+
+        }
+        System.out.println(peers);
+        return peers;
+    }
+
+    @Test
+    public void test001(){
+        System.out.println(URLEncoder.encode("EEB7C79987A49F3CA816A951C404350A83C23C3C"));
+        request("http://tracker2.itzmx.com:6961/announce",  "%EE%B7%C7%99%87%A4%9F%3C%A8%16%A9%51%C4%04%35%0A%83%C2%3C%3C");
 
     }
 }
